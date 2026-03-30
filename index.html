@@ -38,4 +38,241 @@
                     <button onclick="openModal('나(IP)')" class="relationship-btn selected">▣ 나(IP)</button>
                     <button onclick="openModal('배우자')" class="relationship-btn">○ 배우자</button>
                     <button onclick="openModal('어머니')" class="relationship-btn">○ 어머니</button>
-                    <button onclick="openModal('아버지')" class="relationship-btn
+                    <button onclick="openModal('아버지')" class="relationship-btn">□ 아버지</button>
+                    <button onclick="openModal('형')" class="relationship-btn">□ 형</button>
+                    <button onclick="openModal('제')" class="relationship-btn">□ 제</button>
+                    <button onclick="openModal('누나')" class="relationship-btn">○ 누나</button>
+                    <button onclick="openModal('동생')" class="relationship-btn">○ 동생</button>
+                    <button onclick="openModal('아들')" class="relationship-btn">□ 아들</button>
+                    <button onclick="openModal('딸')" class="relationship-btn">○ 딸</button>
+                    <button onclick="openModal('조부')" class="relationship-btn">□ 조부</button>
+                    <button onclick="openModal('조모')" class="relationship-btn">○ 조모</button>
+                    <button onclick="openModal('외조부')" class="relationship-btn">□ 외조부</button>
+                    <button onclick="openModal('외조모')" class="relationship-btn">○ 외조모</button>
+                </div>
+                
+                <h2 class="font-bold text-lg text-gray-800 border-b pb-3 pt-5">관계 연결</h2>
+                <div class="flex flex-col gap-2">
+                    <button onclick="connectMarriage()" class="w-full text-left p-2 border rounded hover:bg-gray-50 text-sm">─ 결혼 연결 (두 노드 선택)</button>
+                    <button onclick="connectParentChild()" class="w-full text-left p-2 border rounded hover:bg-gray-50 text-sm">┴ 부모-자녀 연결 (부모 두 노드, 자녀 한 노드 선택)</button>
+                </div>
+                <button onclick="deleteObjects()" class="w-full text-left p-2 border-2 border-red-600 rounded bg-red-50 text-red-700 font-bold hover:bg-red-100 text-sm mt-5">Delete 삭제</button>
+            </aside>
+
+            <main class="col-span-9">
+                <div class="canvas-container shadow-inner">
+                    <canvas id="genogramCanvas" width="950" height="650"></canvas>
+                </div>
+                <div class="mt-4 p-4 bg-indigo-50 rounded text-sm text-indigo-800">
+                    <strong>사용 팁:</strong> 왼쪽 사이드바에서 가족 관계를 선택하여 노드를 추가하세요. 노드를 드래그하여 배치한 후, '결혼 연결' (두 노드 선택) 또는 '부모-자녀 연결' (부모 두 노드, 자녀 한 노드 선택) 버튼을 눌러 관계를 생성하세요. 'Delete' 키로 선택한 항목을 삭제할 수 있습니다. 노드의 이름과 나이는 더블클릭하여 수정 가능합니다.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="propertyModal" class="modal">
+        <div class="modal-content p-8">
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-6">나(IP) 속성 추가</h3>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">이름</label>
+                    <input type="text" id="modalName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm" placeholder="예: 김민수">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">나이</label>
+                    <input type="number" id="modalAge" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm" placeholder="예: 30">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">학력</label>
+                    <select id="modalEducation" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                        <option value="">선택 안 함</option>
+                        <option value="초졸">초졸</option>
+                        <option value="중졸">중졸</option>
+                        <option value="고졸">고졸</option>
+                        <option value="대졸">대졸</option>
+                        <option value="대학원 졸">대학원 졸</option>
+                    </select>
+                </div>
+                <div id="modalGenderGroup">
+                    <label class="block text-sm font-medium text-gray-700">성별</label>
+                    <select id="modalGender" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                        <option value="male">남성</option>
+                        <option value="female">여성</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">메모</label>
+                    <textarea id="modalMemo" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm" placeholder="추가 정보 입력..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-6">
+                    <button type="button" onclick="closeModal()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded shadow hover:bg-gray-200 transition text-sm">취소</button>
+                    <button type="button" onclick="addPerson()" class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition text-sm">추가</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const canvas = new fabric.Canvas('genogramCanvas', {
+            backgroundColor: '#ffffff',
+            selection: true
+        });
+
+        // 삭제 단축키 및 기능
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                deleteObjects();
+            }
+        });
+
+        function deleteObjects() {
+            canvas.remove(...canvas.getActiveObjects());
+            canvas.discardActiveObject().renderAll();
+        }
+
+        let selectedNodeType = null;
+        const modal = document.getElementById('propertyModal');
+
+        function openModal(relationship) {
+            selectedNodeType = relationship;
+            document.getElementById('modalTitle').innerText = `${relationship} 속성 추가`;
+            
+            // 성별 필드 처리: 나(IP) 일 때만 선택 가능
+            if (relationship === '나(IP)') {
+                document.getElementById('modalGenderGroup').style.display = 'block';
+                document.getElementById('modalGender').value = 'male'; // 기본 남성
+            } else {
+                document.getElementById('modalGenderGroup').style.display = 'none';
+                // 고정 성별 설정
+                if (['어머니', '배우자', '딸', '누나', '동생', '조모', '외조모'].includes(relationship)) {
+                    document.getElementById('modalGender').value = 'female';
+                } else {
+                    document.getElementById('modalGender').value = 'male';
+                }
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            // 폼 초기화
+            document.getElementById('modalName').value = '';
+            document.getElementById('modalAge').value = '';
+            document.getElementById('modalEducation').value = '';
+            document.getElementById('modalMemo').value = '';
+        }
+
+        // 인물 기호 추가
+        function addPerson() {
+            const name = document.getElementById('modalName').value || '이름';
+            const age = document.getElementById('modalAge').value || '나이';
+            const education = document.getElementById('modalEducation').value;
+            const gender = document.getElementById('modalGender').value;
+            const memo = document.getElementById('modalMemo').value;
+
+            let shape;
+            const commonProps = { stroke: 'black', strokeWidth: 2, fill: 'transparent' };
+
+            // IP 여부에 따라 다른 기호
+            if (selectedNodeType === '나(IP)') {
+                // IP 기호 (이중 사각형/원형)
+                if (gender === 'male') {
+                    const outer = new fabric.Rect({ ...commonProps, left: 100, top: 100, width: 60, height: 60, strokeWidth: 2 });
+                    const inner = new fabric.Rect({ ...commonProps, left: 105, top: 105, width: 50, height: 50, strokeWidth: 1 });
+                    shape = new fabric.Group([outer, inner]);
+                } else {
+                    const outer = new fabric.Circle({ ...commonProps, left: 100, top: 100, radius: 30, strokeWidth: 2 });
+                    const inner = new fabric.Circle({ ...commonProps, left: 105, top: 105, radius: 25, strokeWidth: 1 });
+                    shape = new fabric.Group([outer, inner]);
+                }
+            } else {
+                // 일반 기호
+                if (gender === 'male') {
+                    shape = new fabric.Rect({ ...commonProps, width: 50, height: 50 });
+                } else {
+                    shape = new fabric.Circle({ ...commonProps, radius: 25 });
+                }
+            }
+
+            // 텍스트 추가 (이름, 나이)
+            const textContent = `${name}(${age})`;
+            const text = new fabric.IText(textContent, {
+                fontSize: 14,
+                textAlign: 'center',
+                top: gender === 'male' ? (selectedNodeType === '나(IP)' ? 75 : 65) : (selectedNodeType === '나(IP)' ? 75 : 65),
+                left: selectedNodeType === '나(IP)' ? 30 : (gender === 'male' ? 25 : 25),
+                originX: 'center'
+            });
+
+            const group = new fabric.Group([shape, text], { 
+                left: 200, 
+                top: 200, 
+                originX: 'center',
+                originY: 'center',
+                data: { name, age, education, gender, relationship: selectedNodeType, memo } 
+            });
+            canvas.add(group);
+            closeModal();
+        }
+
+        // 관계 연결: 결혼 (두 노드 선택)
+        function connectMarriage() {
+            const selected = canvas.getActiveObjects();
+            if (selected.length !== 2) {
+                alert("결혼 연결을 위해 두 노드를 선택해주세요.");
+                return;
+            }
+            // 두 노드 사이 중앙에서 중앙으로 직선 연결
+            const line = new fabric.Line([selected[0].left, selected[0].top, selected[1].left, selected[1].top], {
+                stroke: 'black',
+                strokeWidth: 2
+            });
+            canvas.add(line);
+            canvas.discardActiveObject().renderAll();
+        }
+
+        // 관계 연결: 부모-자녀 (부모 두 노드, 자녀 한 노드 선택)
+        function connectParentChild() {
+            const selected = canvas.getActiveObjects();
+            if (selected.length !== 3) {
+                alert("부모-자녀 연결을 위해 부모 두 노드와 자녀 한 노드를 선택해주세요.");
+                return;
+            }
+            // 부모의 top 좌표가 비슷하고, 자녀가 아래에 있는 경우를 가정하고 단순 직선 연결
+            // 실제 구현에서는 더 복잡한 로직이 필요할 수 있습니다.
+            // 여기서는 부모 중앙에서 자녀 중앙으로 단순 직선 연결
+            const parent1 = selected[0];
+            const parent2 = selected[1];
+            const child = selected[2];
+            const parentCenter = { x: (parent1.left + parent2.left) / 2, y: (parent1.top + parent2.top) / 2 };
+            const line = new fabric.Line([parentCenter.x, parentCenter.y, child.left, child.top], {
+                stroke: 'black',
+                strokeWidth: 2
+            });
+            canvas.add(line);
+            canvas.discardActiveObject().renderAll();
+        }
+
+        function clearCanvas() {
+            if (confirm("모든 작업 내용을 삭제하시겠습니까?")) canvas.clear();
+        }
+
+        function downloadImage(format) {
+            const dataURL = canvas.toDataURL({ format: format === 'png' ? 'png' : 'jpeg', quality: 1.0 });
+            const link = document.createElement('a');
+            link.download = `FamilyTool_Genogram.${format}`;
+            link.href = dataURL;
+            link.click();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('landscape');
+            const imgData = canvas.toDataURL({ format: 'png', quality: 1.0 });
+            pdf.addImage(imgData, 'PNG', 10, 10, 180, 100);
+            pdf.save('FamilyTool_Genogram.pdf');
+        }
+    </script>
+</body>
+</html>
