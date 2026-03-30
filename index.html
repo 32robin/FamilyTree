@@ -3,203 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FamilyTool Simple v2.1 - 세련된 단순함</title>
+    <title>FamilyTool v2.6 - 내담자 중심 실시간 가계도</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { background-color: #f8fafc; font-family: 'Pretendard', sans-serif; overflow: hidden; }
-        #canvas-container { box-shadow: inset 0 0 100px rgba(79, 70, 229, 0.03); background-color: #fff; border-radius: 48px; position: relative; }
-        .floating-menu { position: absolute; display: none; gap: 8px; pointer-events: none; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
-        .menu-btn { pointer-events: auto; width: 36px; height: 36px; border-radius: 12px; background: white; color: #475569; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; }
-        .menu-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; transform: scale(1.1); }
-        .menu-btn.delete:hover { background: #ef4444; border-color: #ef4444; }
-        .start-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        /* 선택된 노드에 부드러운 네온 효과 */
-        .glow-selection { filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.7)); }
+        body { background-color: #f8fafc; font-family: 'Pretendard', sans-serif; }
+        .input-group { @apply bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-5; }
+        label { @apply block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-tight; }
+        input, select { @apply w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-3 transition-all; }
+        .section-title { @apply text-base font-black text-slate-800 mb-4 flex justify-between items-center; }
+        .btn-add { @apply text-[11px] bg-indigo-600 text-white px-3 py-1.5 rounded-full font-bold hover:bg-indigo-700 transition; }
     </style>
 </head>
-<body class="p-6 flex flex-col h-screen">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <header class="flex justify-between items-center mb-8 px-4">
-        <h1 class="text-2xl font-black text-slate-800 tracking-tighter">FamilyTool <span class="font-extralight text-slate-400">Simple v2.1</span></h1>
-        <div class="flex gap-3">
-            <button onclick="downloadImage()" class="px-6 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">저장 (PNG)</button>
-            <button onclick="location.reload()" class="px-6 py-2.5 bg-slate-900 text-white rounded-full text-sm font-bold hover:bg-black transition shadow-sm">새로 만들기</button>
-        </div>
-    </header>
-
-    <div id="canvas-container" class="relative flex-grow border border-slate-100 overflow-hidden shadow-2xl">
-        <canvas id="c"></canvas>
-        
-        <div id="start-screen" class="start-overlay p-10 bg-white/80 backdrop-blur-sm rounded-3xl border border-white shadow-xl">
-            <button onclick="initIP()" class="px-10 py-5 bg-indigo-600 text-white rounded-full text-xl font-black shadow-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
-                나(IP)부터 시작하기
-            </button>
-            <p class="mt-5 text-slate-500 text-sm font-medium">상담용 간단 가계도를 즉시 시작하세요.</p>
+    <aside class="w-1/3 h-full overflow-y-auto p-8 border-r bg-white/50 backdrop-blur-md">
+        <div class="mb-10">
+            <h1 class="text-2xl font-black text-indigo-900 tracking-tighter">FamilyTool <span class="font-light text-slate-400 text-lg">v2.6</span></h1>
+            <p class="text-sm text-slate-500 mt-1 font-medium">내담자 정보를 기반으로 가계도를 생성합니다.</p>
         </div>
 
-        <div id="node-menu" class="floating-menu flex flex-col">
-            <div class="flex gap-2">
-                <button title="부모 추가" onclick="addRelative('parent')" class="menu-btn">↑</button>
-                <button title="배우자 추가" onclick="addRelative('spouse')" class="menu-btn">→</button>
-                <button title="자녀 추가" onclick="addRelative('child')" class="menu-btn">↓</button>
+        <div class="input-group border-l-4 border-l-indigo-600">
+            <h2 class="section-title text-indigo-900">내담자 (Client)</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label>성별</label>
+                    <select id="ip-gender" onchange="render()" class="mb-0">
+                        <option value="female" selected>여성</option>
+                        <option value="male">남성</option>
+                    </select>
+                </div>
+                <div>
+                    <label>출생연도</label>
+                    <input type="text" id="ip-birth" oninput="render()" placeholder="예: 1999" class="mb-0">
+                </div>
             </div>
-            <div class="flex gap-2 mt-1 justify-center">
-                <button title="성별 변경" onclick="toggleGender()" class="menu-btn text-xs font-bold">♂/♀</button>
-                <button title="삭제" onclick="deleteNode()" class="menu-btn delete bg-red-50 text-red-500 border-red-100">✕</button>
+            <div class="mt-3">
+                <label>직업</label>
+                <input type="text" id="ip-job" oninput="render()" placeholder="예: 대학원생" class="mb-0">
             </div>
         </div>
-    </div>
+
+        <div class="input-group">
+            <h2 class="section-title">부모</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="text-blue-600">아버지</label>
+                    <input type="text" id="fa-birth" oninput="render()" placeholder="출생연도">
+                    <input type="text" id="fa-job" oninput="render()" placeholder="직업" class="mb-0">
+                </div>
+                <div>
+                    <label class="text-pink-600">어머니</label>
+                    <input type="text" id="mo-birth" oninput="render()" placeholder="출생연도">
+                    <input type="text" id="mo-job" oninput="render()" placeholder="직업" class="mb-0">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="section-title">
+                <span>형제자매</span>
+                <button onclick="addSibling()" class="btn-add">+ 추가</button>
+            </div>
+            <div id="sibling-list" class="space-y-3"></div>
+        </div>
+
+        <div class="input-group">
+            <h2 class="section-title">추가 구성원 (선택)</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center gap-2 p-2 border rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                    <input type="checkbox" id="show-spouse" onchange="render()" class="w-4 h-4 mb-0"> <span class="text-xs font-bold text-slate-600">배우자</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 border rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                    <input type="checkbox" id="show-gp" onchange="render()" class="w-4 h-4 mb-0"> <span class="text-xs font-bold text-slate-600">친조부모</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="downloadPNG()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">
+            이미지 저장 (PNG)
+        </button>
+    </aside>
+
+    <main class="w-2/3 h-full bg-white relative">
+        <div id="canvas-container" class="w-full h-full">
+            <canvas id="c"></canvas>
+        </div>
+        <div class="absolute top-6 right-6 bg-indigo-50/80 backdrop-blur px-4 py-2 rounded-2xl border border-indigo-100 text-[11px] font-black text-indigo-600 tracking-widest shadow-sm">
+            RESULT PAGE (LIVE)
+        </div>
+    </main>
 
     <script>
         const container = document.getElementById('canvas-container');
-        const canvas = new fabric.Canvas('c', {
-            width: container.clientWidth,
+        const canvas = new fabric.Canvas('c', { 
+            width: container.clientWidth, 
             height: container.clientHeight,
-            selection: false
+            backgroundColor: '#ffffff'
         });
-        const menu = document.getElementById('node-menu');
-        let activeNode = null;
+        
+        let siblings = [];
 
-        // 1. IP 생성 (최초 시작)
-        function initIP() {
-            document.getElementById('start-screen').style.display = 'none';
-            // 화면 중앙에 IP 생성
-            createPerson(canvas.width / 2, canvas.height / 2, '나(IP)', 'male', true);
+        function addSibling() {
+            const id = Date.now();
+            siblings.push({ id, type: 'brother', birth: '', job: '' });
+            updateSiblingUI();
+            render();
         }
 
-        // 2. 인물 노드 생성 함수 (디자인 고도화)
-        function createPerson(x, y, label, gender, isIP = false) {
-            const props = { stroke: '#475569', strokeWidth: 3, fill: 'white', originX: 'center', originY: 'center' };
-            let shape;
-            
-            if (gender === 'male') {
-                shape = new fabric.Rect({ ...props, width: 55, height: 55 });
-            } else {
-                shape = new fabric.Circle({ ...props, radius: 27.5 });
-            }
+        function removeSibling(id) {
+            siblings = siblings.filter(s => s.id !== id);
+            updateSiblingUI();
+            render();
+        }
 
-            // IP 이중 기호 (정교한 둥근 사각형/원형)
+        function updateSiblingUI() {
+            const list = document.getElementById('sibling-list');
+            list.innerHTML = siblings.map(s => `
+                <div class="p-4 border border-slate-100 rounded-xl bg-slate-50/50 relative group">
+                    <button onclick="removeSibling(${s.id})" class="absolute top-2 right-3 text-slate-300 hover:text-red-500 font-bold transition">✕</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label>관계</label>
+                            <select onchange="updateSib(${s.id}, 'type', this.value); render();" class="text-xs mb-0">
+                                <option value="brother">형/남동생</option>
+                                <option value="sister">누나/여동생</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>출생연도</label>
+                            <input type="text" oninput="updateSib(${s.id}, 'birth', this.value); render();" value="${s.birth}" placeholder="연도" class="text-xs mb-0">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSib(id, key, val) {
+            const sib = siblings.find(s => s.id === id);
+            if (sib) sib[key] = val;
+        }
+
+        // --- 렌더링 엔진 ---
+        function render() {
+            canvas.clear();
+            canvas.setBackgroundColor('#ffffff');
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 + 50;
+
+            // 1. 내담자 (Client)
+            const gender = document.getElementById('ip-gender').value;
+            const birth = document.getElementById('ip-birth').value;
+            const job = document.getElementById('ip-job').value;
+            drawPerson(centerX, centerY, gender, `내담자\n(${birth})\n${job}`, true);
+
+            // 2. 부모
+            const faBirth = document.getElementById('fa-birth').value;
+            const faJob = document.getElementById('fa-job').value;
+            const moBirth = document.getElementById('mo-birth').value;
+            const moJob = document.getElementById('mo-job').value;
+            
+            drawPerson(centerX - 100, centerY - 180, 'male', `부\n(${faBirth})\n${faJob}`);
+            drawPerson(centerX + 100, centerY - 180, 'female', `모\n(${moBirth})\n${moJob}`);
+            
+            // 부모 연결선
+            canvas.add(new fabric.Line([centerX - 100, centerY - 180, centerX + 100, centerY - 180], { stroke: '#cbd5e1', strokeWidth: 2 }));
+            canvas.add(new fabric.Line([centerX, centerY - 180, centerX, centerY - 40], { stroke: '#cbd5e1', strokeWidth: 2 }));
+
+            // 3. 형제자매
+            siblings.forEach((s, i) => {
+                const xPos = centerX + 220 + (i * 120);
+                drawPerson(xPos, centerY, s.type === 'brother' ? 'male' : 'female', `${s.type === 'brother' ? '형제' : '자매'}\n(${s.birth})`);
+                canvas.add(new fabric.Line([centerX, centerY - 100, xPos, centerY - 40], { stroke: '#f1f5f9', strokeWidth: 1 }));
+            });
+
+            canvas.renderAll();
+        }
+
+        function drawPerson(x, y, gender, info = '', isIP = false) {
+            const size = 60;
+            const style = { stroke: '#1e293b', strokeWidth: 3, fill: 'white', originX: 'center', originY: 'center' };
+            let shape;
+
+            if (gender === 'male') shape = new fabric.Rect({ ...style, width: size, height: size });
+            else shape = new fabric.Circle({ ...style, radius: size / 2 });
+
             if (isIP) {
-                const inner = (gender === 'male')
-                    ? new fabric.Rect({ ...props, width: 45, height: 45, strokeWidth: 1.5 })
-                    : new fabric.Circle({ ...props, radius: 22.5, strokeWidth: 1.5 });
+                const inner = (gender === 'male') 
+                    ? new fabric.Rect({ ...style, width: size - 12, height: size - 12, strokeWidth: 1.5 }) 
+                    : new fabric.Circle({ ...style, radius: (size / 2) - 6, strokeWidth: 1.5 });
                 shape = new fabric.Group([shape, inner], { originX: 'center', originY: 'center' });
             }
 
-            // 텍스트 디자인 (더 짙은 색)
-            const text = new fabric.IText(label, {
-                fontSize: 14,
-                fontWeight: 'bold',
-                top: 48,
-                left: 0,
-                originX: 'center',
-                fill: '#1e293b'
+            const text = new fabric.Text(info, { 
+                fontSize: 12, 
+                top: 55, 
+                textAlign: 'center', 
+                originX: 'center', 
+                fill: '#475569', 
+                fontWeight: isIP ? 'bold' : 'normal',
+                lineHeight: 1.2
             });
-
-            const group = new fabric.Group([shape, text], {
-                left: x,
-                top: y,
-                originX: 'center',
-                originY: 'center',
-                hasControls: false,
-                hasBorders: false,
-                data: { gender, isIP }
-            });
-
+            
+            const group = new fabric.Group([shape, text], { left: x, top: y, originX: 'center', originY: 'center' });
             canvas.add(group);
-            return group;
         }
 
-        // 3. 관계 추가 로직 (클릭한 방향에 따라 자동 생성 및 연결)
-        function addRelative(relType) {
-            if (!activeNode) return;
-            
-            const offset = 180; // 간격 조금 더 넓힘
-            let nx = activeNode.left;
-            let ny = activeNode.top;
-            let nGender = activeNode.data.gender === 'male' ? 'female' : 'male';
-            let nLabel = '';
-
-            if (relType === 'parent') { ny -= offset; nLabel = '부모'; nGender = 'female'; }
-            else if (relType === 'spouse') { nx += offset; nLabel = '배우자'; }
-            else if (relType === 'child') { ny += offset; nLabel = '자녀'; }
-
-            const newNode = createPerson(nx, ny, nLabel, nGender);
-            
-            // 세련된 선 연결 (Slate Gray)
-            const line = new fabric.Line([activeNode.left, activeNode.top, nx, ny], {
-                stroke: '#cbd5e1',
-                strokeWidth: 2,
-                selectable: false,
-                evented: false
-            });
-            canvas.add(line);
-            line.sendToBack();
-            
-            hideMenu();
-        }
-
-        // 4. 성별 변경 토글 기능
-        function toggleGender() {
-            if (!activeNode) return;
-            const data = activeNode.data;
-            const newGender = data.gender === 'male' ? 'female' : 'male';
-            const label = activeNode.item(1).text; // 기존 이름 유지
-            const isIP = data.isIP;
-            const { left, top } = activeNode;
-
-            canvas.remove(activeNode);
-            const newNode = createPerson(left, top, label, newGender, isIP);
-            canvas.setActiveObject(newNode);
-            hideMenu(); // 메뉴 위치 갱신을 위해 닫기
-        }
-
-        // 5. 노드 클릭 이벤트 및 메뉴 표시
-        canvas.on('mouse:down', function(options) {
-            if (options.target && options.target.type === 'group') {
-                activeNode = options.target;
-                
-                // 선택된 노드에 시각적 효과 (임시: 캔버스 외곽선으로 표시)
-                // 실제 DOM 필터는 캔버스 밖 메뉴에 적용
-                const zoom = canvas.getZoom();
-                
-                menu.style.display = 'flex';
-                menu.style.left = (activeNode.left * zoom - 60) + 'px'; // 중앙 정렬
-                menu.style.top = (activeNode.top * zoom + 50) + 'px'; // 아래에 표시
-                
-            } else {
-                hideMenu();
-            }
-        });
-
-        function hideMenu() {
-            menu.style.display = 'none';
-            activeNode = null;
-        }
-
-        function deleteNode() {
-            if (activeNode) {
-                canvas.remove(activeNode);
-                hideMenu();
-            }
-        }
-
-        function downloadImage() {
+        function downloadPNG() {
             const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
             const link = document.createElement('a');
-            link.download = 'Genogram_Modern Simple.png';
+            link.download = `FamilyTool_Genogram_${Date.now()}.png`;
             link.href = dataURL;
             link.click();
         }
 
-        // 창 크기 조절 대응
         window.addEventListener('resize', () => {
             canvas.setWidth(container.clientWidth);
             canvas.setHeight(container.clientHeight);
-            canvas.renderAll();
+            render();
         });
+
+        render();
     </script>
 </body>
 </html>
