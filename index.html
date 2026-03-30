@@ -3,161 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genogram Pro - Clinical Standard</title>
+    <title>Genogram Pro (McGoldrick Standard) - 충북대 김병수</title>
+    
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@reactflow/core@11.10.1/dist/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@reactflow/core@11.10.1/dist/prod/index.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/reactflow.browser.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background-color: #ffffff; }
-        .genogram-node { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .label-text { position: absolute; top: 105%; width: 100px; text-align: center; font-size: 12px; font-weight: bold; line-height: 1.2; }
-        /* 표준 기호 스타일 */
-        .shape-square { width: 40px; height: 40px; border: 2px solid black; background: white; }
-        .shape-circle { width: 42px; height: 42px; border: 2px solid black; border-radius: 50%; background: white; }
-        .shape-triangle { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 35px solid black; background: transparent; position: relative; }
-        .shape-triangle::after { content: ''; position: absolute; left: -17px; top: 3px; border-left: 17px solid transparent; border-right: 17px solid transparent; border-bottom: 30px solid white; }
-        /* IP (Identified Patient) */
-        .ip .shape-square, .ip .shape-circle { border-width: 5px; border-style: double; }
-        /* Deceased (사망) */
-        .deceased::before { content: 'X'; position: absolute; font-size: 30px; font-weight: 100; color: black; z-index: 10; }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap');
+        body, html, #root { height: 100%; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; overflow: hidden; background-color: #f8fafc; }
+        
+        /* 임상 표준 가계도 노드 스타일 */
+        .genogram-node { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 60px; height: 60px; }
+        .shape { border: 2px solid black; background: white; box-sizing: border-box; }
+        .label-container { position: absolute; top: 100%; margin-top: 8px; width: 120px; text-align: center; line-height: 1.2; z-index: 5; }
+        .label-name { font-size: 13px; font-weight: 800; color: #1e293b; }
+        .label-age { font-size: 11px; color: #64748b; font-weight: 500; }
+
+        /* 남성: 정사각형 / 여성: 원형 / 임신: 삼각형 */
+        .male .shape { width: 45px; height: 45px; }
+        .female .shape { width: 48px; height: 48px; border-radius: 50%; }
+        .pregnancy .shape { width: 0; height: 0; border-left: 24px solid transparent; border-right: 24px solid transparent; border-bottom: 42px solid black; background: transparent; border-top: 0; border-right-width: 24px; border-left-width: 24px; }
+        .pregnancy .shape::after { content: ''; position: absolute; left: -20px; top: 3px; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 36px solid white; }
+
+        /* IP (내담자): 이중 테두리 */
+        .ip .shape { border-width: 6px; border-style: double; }
+        /* 사망: X 표시 */
+        .deceased::before { content: 'X'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: 200; color: #000; z-index: 2; pointer-events: none; }
+
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div id="root" style="height: 100vh; width: 100vw;"></div>
+    <div id="root">
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; gap:15px; color:#475569;">
+            <div style="width: 30px; height: 30px; border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <p style="font-weight:bold;">McGoldrick 가계도 엔진을 안정적으로 불러오는 중...</p>
+        </div>
+    </div>
+    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useMemo } = React;
-        const { ReactFlow, ReactFlowProvider, useNodesState, useEdgesState, MarkerType, Background, Controls, getBezierPath } = window.ReactFlow;
-
-        // --- 1. 커스텀 노드: 표준 기호 구현 ---
-        const GenogramNode = ({ data }) => {
-            let shapeClass = "shape-square";
-            if (data.gender === 'F') shapeClass = "shape-circle";
-            if (data.gender === 'T') shapeClass = "shape-triangle";
-
-            return (
-                <div className={`genogram-node ${data.isIP ? 'ip' : ''} ${data.isDeceased ? 'deceased' : ''}`}>
-                    <div className={shapeClass}></div>
-                    <div className="label-text">
-                        {data.label}<br/>
-                        <span className="text-[10px] text-gray-500">{data.age}</span>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- 2. 커스텀 엣지: 정서적 역동(갈등, 밀착) 구현 ---
-        const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }) => {
-            const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
-            
-            // 갈등(Zigzag) 스타일링
-            if (data?.type === 'conflict') {
-                return <path id={id} d={edgePath} fill="none" stroke="#ef4444" strokeWidth={3} strokeDasharray="5,5" />;
+        // 2. 라이브러리 안정성 검증 함수
+        const initApp = () => {
+            if (!window.ReactFlow || !window.dagre) {
+                setTimeout(initApp, 50);
+                return;
             }
-            // 밀착(Triple) 스타일링
-            if (data?.type === 'fused') {
+
+            const { useState, useEffect, useCallback, useRef } = React;
+            const { ReactFlow, ReactFlowProvider, useNodesState, useEdgesState, MarkerType, Background, Controls, Panel, getBezierPath } = window.ReactFlow;
+
+            // --- [임상 표준] 커스텀 노드 ---
+            const GenogramNode = ({ data }) => {
+                let genderClass = "male";
+                if (data.gender === 'F') genderClass = "female";
+                if (data.gender === 'T') genderClass = "pregnancy";
+
                 return (
-                    <g>
-                        <path d={edgePath} fill="none" stroke="#3b82f6" strokeWidth={6} />
-                        <path d={edgePath} fill="none" stroke="white" strokeWidth={2} />
-                    </g>
-                );
-            }
-            // 별거/이혼 표시용
-            return <path id={id} d={edgePath} fill="none" stroke="black" strokeWidth={2} />;
-        };
-
-        const nodeTypes = { genogram: GenogramNode };
-        const edgeTypes = { genogramEdge: CustomEdge };
-
-        // --- 3. 레이아웃 엔진 ---
-        const dagreGraph = new dagre.graphlib.Graph();
-        dagreGraph.setDefaultEdgeLabel(() => ({}));
-        const getLayoutedElements = (nodes, edges) => {
-            dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 140 });
-            nodes.forEach(n => dagreGraph.setNode(n.id, { width: 100, height: 100 }));
-            edges.forEach(e => dagreGraph.setEdge(e.source, e.target));
-            dagre.layout(dagreGraph);
-            return nodes.map(n => ({ ...n, position: { x: dagreGraph.node(n.id).x - 50, y: dagreGraph.node(n.id).y - 50 } }));
-        };
-
-        function App() {
-            const [input, setInput] = useState("# 인물: 성별(M/F/T): 이름 [나이, 속성]\nM: 할아버지 [75, 사망]\nF: 할머니 [72]\nM: 아버지 [52]\nF: 어머니 [50]\nM: 나 [IP, 27]\nF: 여동생 [24]\n\n# 관계: 연동부호(->, ==, ~, ===)\n할아버지 == 할머니 [결혼]\n아버지 == 어머니 [결혼]\n할아버지 -> 아버지\n어머니 -> 나\n아버지 -> 나\n나 ~ 아버지 [갈등]\n나 === 여동생 [밀착]");
-            const [nodes, setNodes, onNodesChange] = useNodesState([]);
-            const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-            useEffect(() => {
-                const lines = input.split('\n').filter(l => l.trim() && !l.startsWith('#'));
-                const newNodes = []; const newEdges = []; const nodeSet = new Set();
-
-                lines.forEach((line, i) => {
-                    const define = line.match(/^(M|F|T): (.+?)(\s*\[(.+?)\])?$/);
-                    if (define) {
-                        const [, gender, name, , attrStr] = define;
-                        const attrs = attrStr ? attrStr.split(',').map(a => a.trim()) : [];
-                        nodeSet.add(name);
-                        newNodes.push({
-                            id: name, type: 'genogram',
-                            data: { label: name, gender, isIP: attrs.includes('IP'), isDeceased: attrs.includes('사망'), age: attrs.find(a => !isNaN(a)) || "" },
-                            position: { x: 0, y: 0 }
-                        });
-                    }
-                    const rel = line.match(/(.+?)\s*(==|->|~|===)\s*(.+?)(\s*\[(.+?)\])?$/);
-                    if (rel) {
-                        const [, from, op, to, , label] = rel;
-                        let edgeType = 'default';
-                        if (op === '~') edgeType = 'conflict';
-                        if (op === '===') edgeType = 'fused';
-
-                        newEdges.push({
-                            id: `e-${i}`, source: from, target: to, label: label || "",
-                            type: 'genogramEdge', data: { type: edgeType },
-                            markerEnd: op === '->' ? { type: MarkerType.ArrowClosed, color: '#000' } : null
-                        });
-                    }
-                });
-
-                const layouted = getLayoutedElements(newNodes, newEdges);
-                setNodes(layouted); setEdges(newEdges);
-            }, [input]);
-
-            return (
-                <div className="flex h-full w-full bg-slate-50">
-                    <div className="w-80 bg-slate-900 text-white p-5 flex flex-col shadow-2xl z-10">
-                        <h2 className="text-xl font-black text-blue-400 mb-1">Genogram Pro</h2>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">McGoldrick Standard v3.0</p>
-                        
-                        <textarea className="flex-1 bg-slate-800 border border-slate-700 rounded p-3 font-mono text-xs mb-4 outline-none focus:ring-1 focus:ring-blue-500" value={input} onChange={e => setInput(e.target.value)} />
-                        
-                        <div className="bg-slate-800 p-3 rounded text-[10px] text-slate-400 leading-tight">
-                            <p className="font-bold text-blue-300 mb-1">[기호 규칙]</p>
-                            M:남성, F:여성, T:임신<br/>
-                            [IP]:내담자, [사망]:X표시<br/><br/>
-                            <p className="font-bold text-blue-300 mb-1">[관계 규칙]</p>
-                            == : 결혼 (가로선)<br/>
-                            -> : 혈연 (수직선)<br/>
-                            ~  : 갈등 (빨간 점선)<br/>
-                            ===: 밀착 (푸른 삼중선)
+                    <div className={`genogram-node ${genderClass} ${data.isIP ? 'ip' : ''} ${data.isDeceased ? 'deceased' : ''}`}>
+                        <div className="shape"></div>
+                        <div className="label-container">
+                            <div className="label-name">{data.label}</div>
+                            <div className="label-age">{data.age ? `${data.age}세` : ''}</div>
                         </div>
                     </div>
-                    <div className="flex-1 relative">
-                        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} onNodesChange={onNodesChange} fitView>
-                            <Background color="#e2e8f0" gap={20} />
-                            <Controls />
-                        </ReactFlow>
-                    </div>
-                </div>
-            );
-        }
+                );
+            };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ReactFlowProvider><App /></ReactFlowProvider>);
+            // --- [임상 표준] 커스텀 엣지 (정서적 관계) ---
+            const GenogramEdge = ({ id, sourceX, sourceY, targetX, targetY, data }) => {
+                const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
+                
+                if (data?.type === 'conflict') { // 갈등: 빨간 지그재그 점선
+                    return <path id={id} d={edgePath} fill="none" stroke="#ef4444" strokeWidth={3} strokeDasharray="5,5" />;
+                }
+                if (data?.type === 'fused') { // 밀착: 굵은 이중선
+                    return (
+                        <g>
+                            <path d={edgePath} fill="none" stroke="#3b82f6" strokeWidth={7} />
+                            <path d={edgePath} fill="none" stroke="white" strokeWidth={2} />
+                        </g>
+                    );
+                }
+                return <path id={id} d={edgePath} fill="none" stroke="#000" strokeWidth={1.5} />;
+            };
+
+            const nodeTypes = { genogram: GenogramNode };
+            const edgeTypes = { gEdge: GenogramEdge };
+
+            // 레이아웃 설정
+            const dagreGraph = new dagre.graphlib.Graph();
+            dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+            const applyLayout = (nodes, edges) => {
+                dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 140 });
+                nodes.forEach(n => dagreGraph.setNode(n.id, { width: 100, height: 100 }));
+                edges.forEach(e => dagreGraph.setEdge(e.source, e.target));
+                dagre.layout(dagreGraph);
+                return nodes.map(n => ({ ...n, position: { x: dagreGraph.node(n.id).x - 50, y: dagreGraph.node(n.id).y - 50 } }));
+            };
+
+            function App() {
+                const [input, setInput] = useState("# 인물정의(M/F/T): 이름 [나이, 속성]\nM: 할아버지 [78, 사망]\nF: 할머니 [75]\nM: 아버지 [52]\nF: 어머니 [49]\nM: 나 [IP, 26]\nF: 여동생 [23]\n\n# 관계연결: ->(혈연), ==(결혼), ~(갈등), ===(밀착)\n할아버지 == 할머니 [결혼]\n아버지 == 어머니 [결혼]\n아버지 -> 나\n어머니 -> 나\n나 ~ 아버지 [갈등]\n나 === 여동생 [밀착]");
+                const [nodes, setNodes, onNodesChange] = useNodesState([]);
+                const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+                const [error, setError] = useState("");
+
+                useEffect(() => {
+                    try {
+                        const lines = input.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+                        const tNodes = []; const tEdges = []; const nodeNames = new Set();
+
+                        lines.forEach((line, i) => {
+                            const def = line.match(/^(M|F|T): (.+?)(\s*\[(.+?)\])?$/);
+                            if (def) {
+                                const [, gender, name, , attrStr] = def;
+                                const attrs = attrStr ? attrStr.split(',').map(a => a.trim()) : [];
+                                nodeNames.add(name.trim());
+                                tNodes.push({
+                                    id: name.trim(), type: 'genogram',
+                                    data: { 
+                                        label: name.trim(), gender, 
+                                        isIP: attrs.includes('IP'), 
+                                        isDeceased: attrs.includes('사망'),
+                                        age: attrs.find(a => !isNaN(a)) || "" 
+                                    },
+                                    position: { x: 0, y: 0 }
+                                });
+                                return;
+                            }
+                            const rel = line.match(/(.+?)\s*(==|->|~|===)\s*(.+?)(\s*\[(.+?)\])?$/);
+                            if (rel) {
+                                const [, from, op, to, , label] = rel.map(s => s?.trim());
+                                if (!nodeNames.has(from) || !nodeNames.has(to)) return;
+                                
+                                let type = 'default';
+                                if (op === '~') type = 'conflict';
+                                if (op === '===') type = 'fused';
+
+                                tEdges.push({
+                                    id: `e-${i}`, source: from, target: to, label: label || "",
+                                    type: 'gEdge', data: { type },
+                                    markerEnd: op === '->' ? { type: MarkerType.ArrowClosed, color: '#000' } : null
+                                });
+                            }
+                        });
+                        setNodes(applyLayout(tNodes, tEdges));
+                        setEdges(tEdges);
+                        setError("");
+                    } catch (e) { setError("문법을 확인해주세요."); }
+                }, [input]);
+
+                const saveImage = async () => {
+                    const el = document.querySelector('.react-flow__viewport');
+                    const dataUrl = await htmlToImage.toPng(el, { backgroundColor: '#ffffff', pixelRatio: 2 });
+                    const link = document.createElement('a');
+                    link.download = `Genogram_${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                };
+
+                return (
+                    <div className="flex h-screen w-full">
+                        <div className="w-80 bg-slate-900 flex flex-col shadow-2xl z-20 text-slate-300">
+                            <div className="p-6 border-b border-slate-800">
+                                <h1 className="text-xl font-black text-white tracking-tight">Genogram Pro</h1>
+                                <p className="text-[10px] text-blue-400 font-bold uppercase mt-1">McGoldrick Standard v3.5</p>
+                            </div>
+                            <div className="flex-1 p-5 overflow-y-auto sidebar-scroll">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Data Syntax</label>
+                                <textarea className="w-full h-64 bg-slate-800 border border-slate-700 rounded p-3 font-mono text-xs focus:ring-1 focus:ring-blue-500 outline-none" value={input} onChange={e => setInput(e.target.value)} />
+                                {error && <p className="text-red-400 text-[10px] mt-2 font-bold">{error}</p>}
+                                
+                                <div className="mt-6 space-y-4">
+                                    <button onClick={saveImage} className="w-full bg-white text-slate-900 py-3 rounded font-black text-xs hover:bg-blue-50 transition-all">이미지 추출 (.PNG)</button>
+                                    <div className="bg-slate-800/50 p-4 rounded border border-slate-700 text-[10px] leading-relaxed">
+                                        <p className="text-blue-400 font-bold mb-2 underline">표준 규칙 가이드</p>
+                                        • M:남성, F:여성, T:임신<br/>
+                                        • [IP]:내담자, [사망]:X표시<br/>
+                                        • ==:결혼, ->:혈연<br/>
+                                        • ~:갈등(빨간점선), ===:밀착(삼중선)
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4 text-center border-t border-slate-800 text-[10px] font-bold text-slate-600">
+                                충북대 심리학과 김병수 제작
+                            </div>
+                        </div>
+                        <div className="flex-1 relative">
+                            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView>
+                                <Background color="#cbd5e1" gap={25} />
+                                <Controls />
+                                <Panel position="top-right" className="bg-white/80 p-2 rounded text-[10px] font-bold border">Interactive Preview</Panel>
+                            </ReactFlow>
+                        </div>
+                    </div>
+                );
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<ReactFlowProvider><App /></ReactFlowProvider>);
+        };
+
+        // 즉시 실행
+        initApp();
     </script>
 </body>
 </html>
