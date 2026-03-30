@@ -3,229 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FamilyTool v2.6 - 내담자 중심 실시간 가계도</title>
+    <title>GenoPro Academic v3.0 - 통합 심리 모델</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { background-color: #f8fafc; font-family: 'Pretendard', sans-serif; }
-        .input-group { @apply bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-5; }
-        label { @apply block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-tight; }
-        input, select { @apply w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-3 transition-all; }
-        .section-title { @apply text-base font-black text-slate-800 mb-4 flex justify-between items-center; }
-        .btn-add { @apply text-[11px] bg-indigo-600 text-white px-3 py-1.5 rounded-full font-bold hover:bg-indigo-700 transition; }
+        :root {
+            --bg: #ffffff;
+            --sidebar: #f8f9fa;
+            --border: #d1d5db;
+            --accent: #2563eb;
+            --text: #111827;
+            --male: #2563eb;
+            --female: #dc2626;
+            --psych: #6b7280; /* 심리적 문제 색상 */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR STYLE */
+        #sidebar {
+            width: 380px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .header { padding: 25px 20px; border-bottom: 1px solid var(--border); background: #fff; }
+        .header h1 { font-size: 20px; color: var(--accent); font-weight: 700; }
+        .header p { font-size: 12px; color: #6b7280; margin-top: 5px; }
+
+        .content { flex: 1; overflow-y: auto; padding: 20px; }
+        .section { background: #fff; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #374151; display: flex; align-items: center; gap: 8px; }
+
+        label { display: block; font-size: 11px; color: #4b5563; margin-bottom: 6px; font-weight: 600; }
+        input, select {
+            width: 100%; background: #fff; border: 1px solid var(--border); color: var(--text);
+            padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent); outline: none; }
+        
+        .btn { padding: 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border: 1px solid var(--border); width: 100%; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: white; border: none; margin-bottom: 8px; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-danger { background: #ef4444; color: white; border: none; }
+        .btn-danger:hover { background: #dc2626; }
+        
+        /* CANVAS AREA */
+        #main { flex: 1; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative; }
+        #canvas-wrap { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
+        
+        .sibling-card { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .remove-btn { color: #ef4444; font-size: 11px; cursor: pointer; border: none; background: none; font-weight: 600; float: right; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden bg-slate-50">
+<body>
 
-    <aside class="w-1/3 h-full overflow-y-auto p-8 border-r bg-white/50 backdrop-blur-md">
-        <div class="mb-10">
-            <h1 class="text-2xl font-black text-indigo-900 tracking-tighter">FamilyTool <span class="font-light text-slate-400 text-lg">v2.6</span></h1>
-            <p class="text-sm text-slate-500 mt-1 font-medium">내담자 정보를 기반으로 가계도를 생성합니다.</p>
-        </div>
+<aside id="sidebar">
+    <div class="header">
+        <h1>GenoPro Academic 3.0</h1>
+        <p>통합 심리 모델 및 연구용 화이트 에디션</p>
+    </div>
 
-        <div class="input-group border-l-4 border-l-indigo-600">
-            <h2 class="section-title text-indigo-900">내담자 (Client)</h2>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label>성별</label>
-                    <select id="ip-gender" onchange="render()" class="mb-0">
-                        <option value="female" selected>여성</option>
-                        <option value="male">남성</option>
-                    </select>
-                </div>
-                <div>
-                    <label>출생연도</label>
-                    <input type="text" id="ip-birth" oninput="render()" placeholder="예: 1999" class="mb-0">
-                </div>
+    <div class="content">
+        <div class="section">
+            <div class="section-title">내담자 (Index Person)</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label>성별</label><select id="ip-gender" onchange="updateState()"><option value="female">여성</option><option value="male">남성</option></select></div>
+                <div><label>출생</label><input type="number" id="ip-birth" value="1999" oninput="updateState()"></div>
             </div>
-            <div class="mt-3">
-                <label>직업</label>
-                <input type="text" id="ip-job" oninput="render()" placeholder="예: 대학원생" class="mb-0">
-            </div>
+            <label>임상적 상태</label>
+            <select id="ip-note" onchange="updateState()">
+                <option value="">정상/미확인</option>
+                <option value="psych_issue">심리적 문제 (Psychological Issue)</option>
+                <option value="deceased">사망 (Deceased)</option>
+                <option value="both">사망 및 심리적 문제</option>
+            </select>
         </div>
 
-        <div class="input-group">
-            <h2 class="section-title">부모</h2>
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="text-blue-600">아버지</label>
-                    <input type="text" id="fa-birth" oninput="render()" placeholder="출생연도">
-                    <input type="text" id="fa-job" oninput="render()" placeholder="직업" class="mb-0">
-                </div>
-                <div>
-                    <label class="text-pink-600">어머니</label>
-                    <input type="text" id="mo-birth" oninput="render()" placeholder="출생연도">
-                    <input type="text" id="mo-job" oninput="render()" placeholder="직업" class="mb-0">
-                </div>
-            </div>
+        <div class="section">
+            <div class="section-title">형제자매 (Siblings)</div>
+            <div id="sibling-list"></div>
+            <button class="btn btn-primary" onclick="addSibling()">+ 형제자매 추가</button>
         </div>
 
-        <div class="input-group">
-            <div class="section-title">
-                <span>형제자매</span>
-                <button onclick="addSibling()" class="btn-add">+ 추가</button>
-            </div>
-            <div id="sibling-list" class="space-y-3"></div>
+        <div class="section">
+            <div class="section-title">출력 및 데이터</div>
+            <button class="btn" style="margin-bottom:8px;" onclick="saveImage()">PNG 고해상도 저장</button>
+            <button class="btn btn-danger" onclick="resetState()">전체 초기화</button>
         </div>
+    </div>
+</aside>
 
-        <div class="input-group">
-            <h2 class="section-title">추가 구성원 (선택)</h2>
-            <div class="grid grid-cols-2 gap-2">
-                <div class="flex items-center gap-2 p-2 border rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                    <input type="checkbox" id="show-spouse" onchange="render()" class="w-4 h-4 mb-0"> <span class="text-xs font-bold text-slate-600">배우자</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 border rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                    <input type="checkbox" id="show-gp" onchange="render()" class="w-4 h-4 mb-0"> <span class="text-xs font-bold text-slate-600">친조부모</span>
-                </div>
-            </div>
-        </div>
+<main id="main">
+    <div id="canvas-wrap">
+        <canvas id="canvas"></canvas>
+    </div>
+</main>
 
-        <button onclick="downloadPNG()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-black transition-all transform hover:-translate-y-1">
-            이미지 저장 (PNG)
-        </button>
-    </aside>
+<script>
+    let state = {
+        ip: { id: 'IP', name: 'IP', gender: 'female', birth: 1999, note: '', type: 'IP' },
+        siblings: []
+    };
 
-    <main class="w-2/3 h-full bg-white relative">
-        <div id="canvas-container" class="w-full h-full">
-            <canvas id="c"></canvas>
-        </div>
-        <div class="absolute top-6 right-6 bg-indigo-50/80 backdrop-blur px-4 py-2 rounded-2xl border border-indigo-100 text-[11px] font-black text-indigo-600 tracking-widest shadow-sm">
-            RESULT PAGE (LIVE)
-        </div>
-    </main>
+    const canvas = new fabric.Canvas('canvas', {
+        backgroundColor: '#ffffff',
+        width: 900,
+        height: 700
+    });
 
-    <script>
-        const container = document.getElementById('canvas-container');
-        const canvas = new fabric.Canvas('c', { 
-            width: container.clientWidth, 
-            height: container.clientHeight,
-            backgroundColor: '#ffffff'
-        });
-        
-        let siblings = [];
+    const SZ = 45;
+    const COLORS = { male: '#2563eb', female: '#dc2626', line: '#4b5563', deceased: '#000000', psych: '#6b7280' };
 
-        function addSibling() {
-            const id = Date.now();
-            siblings.push({ id, type: 'brother', birth: '', job: '' });
-            updateSiblingUI();
-            render();
-        }
-
-        function removeSibling(id) {
-            siblings = siblings.filter(s => s.id !== id);
-            updateSiblingUI();
-            render();
-        }
-
-        function updateSiblingUI() {
-            const list = document.getElementById('sibling-list');
-            list.innerHTML = siblings.map(s => `
-                <div class="p-4 border border-slate-100 rounded-xl bg-slate-50/50 relative group">
-                    <button onclick="removeSibling(${s.id})" class="absolute top-2 right-3 text-slate-300 hover:text-red-500 font-bold transition">✕</button>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label>관계</label>
-                            <select onchange="updateSib(${s.id}, 'type', this.value); render();" class="text-xs mb-0">
-                                <option value="brother">형/남동생</option>
-                                <option value="sister">누나/여동생</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>출생연도</label>
-                            <input type="text" oninput="updateSib(${s.id}, 'birth', this.value); render();" value="${s.birth}" placeholder="연도" class="text-xs mb-0">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateSib(id, key, val) {
-            const sib = siblings.find(s => s.id === id);
-            if (sib) sib[key] = val;
-        }
-
-        // --- 렌더링 엔진 ---
-        function render() {
-            canvas.clear();
-            canvas.setBackgroundColor('#ffffff');
-
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2 + 50;
-
-            // 1. 내담자 (Client)
-            const gender = document.getElementById('ip-gender').value;
-            const birth = document.getElementById('ip-birth').value;
-            const job = document.getElementById('ip-job').value;
-            drawPerson(centerX, centerY, gender, `내담자\n(${birth})\n${job}`, true);
-
-            // 2. 부모
-            const faBirth = document.getElementById('fa-birth').value;
-            const faJob = document.getElementById('fa-job').value;
-            const moBirth = document.getElementById('mo-birth').value;
-            const moJob = document.getElementById('mo-job').value;
-            
-            drawPerson(centerX - 100, centerY - 180, 'male', `부\n(${faBirth})\n${faJob}`);
-            drawPerson(centerX + 100, centerY - 180, 'female', `모\n(${moBirth})\n${moJob}`);
-            
-            // 부모 연결선
-            canvas.add(new fabric.Line([centerX - 100, centerY - 180, centerX + 100, centerY - 180], { stroke: '#cbd5e1', strokeWidth: 2 }));
-            canvas.add(new fabric.Line([centerX, centerY - 180, centerX, centerY - 40], { stroke: '#cbd5e1', strokeWidth: 2 }));
-
-            // 3. 형제자매
-            siblings.forEach((s, i) => {
-                const xPos = centerX + 220 + (i * 120);
-                drawPerson(xPos, centerY, s.type === 'brother' ? 'male' : 'female', `${s.type === 'brother' ? '형제' : '자매'}\n(${s.birth})`);
-                canvas.add(new fabric.Line([centerX, centerY - 100, xPos, centerY - 40], { stroke: '#f1f5f9', strokeWidth: 1 }));
-            });
-
-            canvas.renderAll();
-        }
-
-        function drawPerson(x, y, gender, info = '', isIP = false) {
-            const size = 60;
-            const style = { stroke: '#1e293b', strokeWidth: 3, fill: 'white', originX: 'center', originY: 'center' };
-            let shape;
-
-            if (gender === 'male') shape = new fabric.Rect({ ...style, width: size, height: size });
-            else shape = new fabric.Circle({ ...style, radius: size / 2 });
-
-            if (isIP) {
-                const inner = (gender === 'male') 
-                    ? new fabric.Rect({ ...style, width: size - 12, height: size - 12, strokeWidth: 1.5 }) 
-                    : new fabric.Circle({ ...style, radius: (size / 2) - 6, strokeWidth: 1.5 });
-                shape = new fabric.Group([shape, inner], { originX: 'center', originY: 'center' });
-            }
-
-            const text = new fabric.Text(info, { 
-                fontSize: 12, 
-                top: 55, 
-                textAlign: 'center', 
-                originX: 'center', 
-                fill: '#475569', 
-                fontWeight: isIP ? 'bold' : 'normal',
-                lineHeight: 1.2
-            });
-            
-            const group = new fabric.Group([shape, text], { left: x, top: y, originX: 'center', originY: 'center' });
-            canvas.add(group);
-        }
-
-        function downloadPNG() {
-            const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
-            const link = document.createElement('a');
-            link.download = `FamilyTool_Genogram_${Date.now()}.png`;
-            link.href = dataURL;
-            link.click();
-        }
-
-        window.addEventListener('resize', () => {
-            canvas.setWidth(container.clientWidth);
-            canvas.setHeight(container.clientHeight);
-            render();
-        });
-
+    function updateState() {
+        state.ip.gender = document.getElementById('ip-gender').value;
+        state.ip.birth = parseInt(document.getElementById('ip-birth').value);
+        state.ip.note = document.getElementById('ip-note').value;
         render();
-    </script>
+    }
+
+    function addSibling() {
+        const id = 'SIB_' + Date.now();
+        state.siblings.push({ id, name: 'Sibling', gender: 'male', birth: 2001, note: '', type: 'sibling' });
+        render();
+        updateUI();
+    }
+
+    function removeSibling(id) {
+        state.siblings = state.siblings.filter(s => s.id !== id);
+        render();
+        updateUI();
+    }
+
+    function updateSib(id, field, value) {
+        const sib = state.siblings.find(s => s.id === id);
+        if (sib) {
+            sib[field] = (field === 'birth') ? parseInt(value) : value;
+            render();
+        }
+    }
+
+    function drawPerson(x, y, data) {
+        const isIP = data.type === 'IP';
+        const color = data.gender === 'male' ? COLORS.male : COLORS.female;
+        const group = new fabric.Group([], { left: x, top: y, originX: 'center', originY: 'center' });
+
+        // 1. Base Shape
+        let base;
+        if (data.gender === 'male') {
+            base = new fabric.Rect({ width: SZ*2, height: SZ*2, fill: '#fff', stroke: color, strokeWidth: isIP ? 4 : 2, originX: 'center', originY: 'center' });
+        } else {
+            base = new fabric.Circle({ radius: SZ, fill: '#fff', stroke: color, strokeWidth: isIP ? 4 : 2, originX: 'center', originY: 'center' });
+        }
+        group.addWithUpdate(base);
+
+        // 2. 통합된 심리적 문제 (Hatching Pattern)
+        if (data.note === 'psych_issue' || data.note === 'both') {
+            // 표준: 사선 패턴으로 심리적/물질적 문제 통합 표현
+            for(let i = -SZ; i <= SZ; i += 10) {
+                group.addWithUpdate(new fabric.Line([i, -SZ, i + 10, SZ], { 
+                    stroke: COLORS.psych, strokeWidth: 1, opacity: 0.5, clipPath: base 
+                }));
+            }
+        }
+
+        // 3. 사망 표시 (Deceased)
+        if (data.note === 'deceased' || data.note === 'both') {
+            const x1 = new fabric.Line([-SZ, -SZ, SZ, SZ], { stroke: COLORS.deceased, strokeWidth: 2 });
+            const x2 = new fabric.Line([SZ, -SZ, -SZ, SZ], { stroke: COLORS.deceased, strokeWidth: 2 });
+            group.addWithUpdate(x1, x2);
+        }
+
+        // 4. IP 이중 테두리
+        if (isIP) {
+            const inner = data.gender === 'male'
+                ? new fabric.Rect({ width: SZ*1.5, height: SZ*1.5, fill: 'transparent', stroke: color, strokeWidth: 1.5, originX: 'center', originY: 'center' })
+                : new fabric.Circle({ radius: SZ*0.75, fill: 'transparent', stroke: color, strokeWidth: 1.5, originX: 'center', originY: 'center' });
+            group.addWithUpdate(inner);
+        }
+
+        const label = new fabric.Text(`${data.name}\n${data.birth || ''}`, {
+            left: 0, top: SZ + 18, fontSize: 13, fill: '#1f2937', textAlign: 'center', originX: 'center', fontWeight: '500'
+        });
+        group.addWithUpdate(label);
+
+        canvas.add(group);
+    }
+
+    function render() {
+        canvas.clear();
+        canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+        
+        const midX = canvas.width / 2;
+        const midY = canvas.height / 2;
+
+        const allChildren = [...state.siblings, state.ip].sort((a, b) => a.birth - b.birth);
+        const totalW = (allChildren.length - 1) * 170;
+        const startX = midX - totalW / 2;
+
+        allChildren.forEach((child, i) => {
+            drawPerson(startX + (i * 170), midY, child);
+        });
+
+        canvas.renderAll();
+    }
+
+    function updateUI() {
+        const list = document.getElementById('sibling-list');
+        list.innerHTML = state.siblings.map(s => `
+            <div class="sibling-card">
+                <button class="remove-btn" onclick="removeSibling('${s.id}')">삭제</button>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <select onchange="updateSib('${s.id}', 'gender', this.value)">
+                        <option value="male" ${s.gender==='male'?'selected':''}>남성</option>
+                        <option value="female" ${s.gender==='female'?'selected':''}>여성</option>
+                    </select>
+                    <input type="number" value="${s.birth}" onchange="updateSib('${s.id}', 'birth', this.value)">
+                </div>
+                <select onchange="updateSib('${s.id}', 'note', this.value)">
+                    <option value="">특이사항 없음</option>
+                    <option value="psych_issue">심리적 문제</option>
+                    <option value="deceased">사망</option>
+                </select>
+            </div>
+        `).join('');
+    }
+
+    function saveImage() {
+        const dataURL = canvas.toDataURL({ format: 'png', multiplier: 3 });
+        const link = document.createElement('a');
+        link.download = `Genogram_v3_${state.ip.birth}.png`;
+        link.href = dataURL;
+        link.click();
+    }
+
+    function resetState() { if(confirm("데이터를 초기화하시겠습니까?")) location.reload(); }
+
+    updateUI();
+    render();
+</script>
 </body>
 </html>
