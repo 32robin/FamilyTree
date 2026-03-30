@@ -3,256 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GenoPro Academic v3.0 - 통합 심리 모델</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Genogram Pro - Clinical Standard</title>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@reactflow/core@11.10.1/dist/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@reactflow/core@11.10.1/dist/prod/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <style>
-        :root {
-            --bg: #ffffff;
-            --sidebar: #f8f9fa;
-            --border: #d1d5db;
-            --accent: #2563eb;
-            --text: #111827;
-            --male: #2563eb;
-            --female: #dc2626;
-            --psych: #6b7280; /* 심리적 문제 색상 */
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Noto Sans KR', sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* SIDEBAR STYLE */
-        #sidebar {
-            width: 380px;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .header { padding: 25px 20px; border-bottom: 1px solid var(--border); background: #fff; }
-        .header h1 { font-size: 20px; color: var(--accent); font-weight: 700; }
-        .header p { font-size: 12px; color: #6b7280; margin-top: 5px; }
-
-        .content { flex: 1; overflow-y: auto; padding: 20px; }
-        .section { background: #fff; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #374151; display: flex; align-items: center; gap: 8px; }
-
-        label { display: block; font-size: 11px; color: #4b5563; margin-bottom: 6px; font-weight: 600; }
-        input, select {
-            width: 100%; background: #fff; border: 1px solid var(--border); color: var(--text);
-            padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        input:focus, select:focus { border-color: var(--accent); outline: none; }
-        
-        .btn { padding: 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border: 1px solid var(--border); width: 100%; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: white; border: none; margin-bottom: 8px; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-danger { background: #ef4444; color: white; border: none; }
-        .btn-danger:hover { background: #dc2626; }
-        
-        /* CANVAS AREA */
-        #main { flex: 1; background: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative; }
-        #canvas-wrap { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
-        
-        .sibling-card { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .remove-btn { color: #ef4444; font-size: 11px; cursor: pointer; border: none; background: none; font-weight: 600; float: right; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background-color: #ffffff; }
+        .genogram-node { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .label-text { position: absolute; top: 105%; width: 100px; text-align: center; font-size: 12px; font-weight: bold; line-height: 1.2; }
+        /* 표준 기호 스타일 */
+        .shape-square { width: 40px; height: 40px; border: 2px solid black; background: white; }
+        .shape-circle { width: 42px; height: 42px; border: 2px solid black; border-radius: 50%; background: white; }
+        .shape-triangle { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 35px solid black; background: transparent; position: relative; }
+        .shape-triangle::after { content: ''; position: absolute; left: -17px; top: 3px; border-left: 17px solid transparent; border-right: 17px solid transparent; border-bottom: 30px solid white; }
+        /* IP (Identified Patient) */
+        .ip .shape-square, .ip .shape-circle { border-width: 5px; border-style: double; }
+        /* Deceased (사망) */
+        .deceased::before { content: 'X'; position: absolute; font-size: 30px; font-weight: 100; color: black; z-index: 10; }
     </style>
 </head>
 <body>
+    <div id="root" style="height: 100vh; width: 100vw;"></div>
 
-<aside id="sidebar">
-    <div class="header">
-        <h1>GenoPro Academic 3.0</h1>
-        <p>통합 심리 모델 및 연구용 화이트 에디션</p>
-    </div>
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useMemo } = React;
+        const { ReactFlow, ReactFlowProvider, useNodesState, useEdgesState, MarkerType, Background, Controls, getBezierPath } = window.ReactFlow;
 
-    <div class="content">
-        <div class="section">
-            <div class="section-title">내담자 (Index Person)</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>성별</label><select id="ip-gender" onchange="updateState()"><option value="female">여성</option><option value="male">남성</option></select></div>
-                <div><label>출생</label><input type="number" id="ip-birth" value="1999" oninput="updateState()"></div>
-            </div>
-            <label>임상적 상태</label>
-            <select id="ip-note" onchange="updateState()">
-                <option value="">정상/미확인</option>
-                <option value="psych_issue">심리적 문제 (Psychological Issue)</option>
-                <option value="deceased">사망 (Deceased)</option>
-                <option value="both">사망 및 심리적 문제</option>
-            </select>
-        </div>
+        // --- 1. 커스텀 노드: 표준 기호 구현 ---
+        const GenogramNode = ({ data }) => {
+            let shapeClass = "shape-square";
+            if (data.gender === 'F') shapeClass = "shape-circle";
+            if (data.gender === 'T') shapeClass = "shape-triangle";
 
-        <div class="section">
-            <div class="section-title">형제자매 (Siblings)</div>
-            <div id="sibling-list"></div>
-            <button class="btn btn-primary" onclick="addSibling()">+ 형제자매 추가</button>
-        </div>
-
-        <div class="section">
-            <div class="section-title">출력 및 데이터</div>
-            <button class="btn" style="margin-bottom:8px;" onclick="saveImage()">PNG 고해상도 저장</button>
-            <button class="btn btn-danger" onclick="resetState()">전체 초기화</button>
-        </div>
-    </div>
-</aside>
-
-<main id="main">
-    <div id="canvas-wrap">
-        <canvas id="canvas"></canvas>
-    </div>
-</main>
-
-<script>
-    let state = {
-        ip: { id: 'IP', name: 'IP', gender: 'female', birth: 1999, note: '', type: 'IP' },
-        siblings: []
-    };
-
-    const canvas = new fabric.Canvas('canvas', {
-        backgroundColor: '#ffffff',
-        width: 900,
-        height: 700
-    });
-
-    const SZ = 45;
-    const COLORS = { male: '#2563eb', female: '#dc2626', line: '#4b5563', deceased: '#000000', psych: '#6b7280' };
-
-    function updateState() {
-        state.ip.gender = document.getElementById('ip-gender').value;
-        state.ip.birth = parseInt(document.getElementById('ip-birth').value);
-        state.ip.note = document.getElementById('ip-note').value;
-        render();
-    }
-
-    function addSibling() {
-        const id = 'SIB_' + Date.now();
-        state.siblings.push({ id, name: 'Sibling', gender: 'male', birth: 2001, note: '', type: 'sibling' });
-        render();
-        updateUI();
-    }
-
-    function removeSibling(id) {
-        state.siblings = state.siblings.filter(s => s.id !== id);
-        render();
-        updateUI();
-    }
-
-    function updateSib(id, field, value) {
-        const sib = state.siblings.find(s => s.id === id);
-        if (sib) {
-            sib[field] = (field === 'birth') ? parseInt(value) : value;
-            render();
-        }
-    }
-
-    function drawPerson(x, y, data) {
-        const isIP = data.type === 'IP';
-        const color = data.gender === 'male' ? COLORS.male : COLORS.female;
-        const group = new fabric.Group([], { left: x, top: y, originX: 'center', originY: 'center' });
-
-        // 1. Base Shape
-        let base;
-        if (data.gender === 'male') {
-            base = new fabric.Rect({ width: SZ*2, height: SZ*2, fill: '#fff', stroke: color, strokeWidth: isIP ? 4 : 2, originX: 'center', originY: 'center' });
-        } else {
-            base = new fabric.Circle({ radius: SZ, fill: '#fff', stroke: color, strokeWidth: isIP ? 4 : 2, originX: 'center', originY: 'center' });
-        }
-        group.addWithUpdate(base);
-
-        // 2. 통합된 심리적 문제 (Hatching Pattern)
-        if (data.note === 'psych_issue' || data.note === 'both') {
-            // 표준: 사선 패턴으로 심리적/물질적 문제 통합 표현
-            for(let i = -SZ; i <= SZ; i += 10) {
-                group.addWithUpdate(new fabric.Line([i, -SZ, i + 10, SZ], { 
-                    stroke: COLORS.psych, strokeWidth: 1, opacity: 0.5, clipPath: base 
-                }));
-            }
-        }
-
-        // 3. 사망 표시 (Deceased)
-        if (data.note === 'deceased' || data.note === 'both') {
-            const x1 = new fabric.Line([-SZ, -SZ, SZ, SZ], { stroke: COLORS.deceased, strokeWidth: 2 });
-            const x2 = new fabric.Line([SZ, -SZ, -SZ, SZ], { stroke: COLORS.deceased, strokeWidth: 2 });
-            group.addWithUpdate(x1, x2);
-        }
-
-        // 4. IP 이중 테두리
-        if (isIP) {
-            const inner = data.gender === 'male'
-                ? new fabric.Rect({ width: SZ*1.5, height: SZ*1.5, fill: 'transparent', stroke: color, strokeWidth: 1.5, originX: 'center', originY: 'center' })
-                : new fabric.Circle({ radius: SZ*0.75, fill: 'transparent', stroke: color, strokeWidth: 1.5, originX: 'center', originY: 'center' });
-            group.addWithUpdate(inner);
-        }
-
-        const label = new fabric.Text(`${data.name}\n${data.birth || ''}`, {
-            left: 0, top: SZ + 18, fontSize: 13, fill: '#1f2937', textAlign: 'center', originX: 'center', fontWeight: '500'
-        });
-        group.addWithUpdate(label);
-
-        canvas.add(group);
-    }
-
-    function render() {
-        canvas.clear();
-        canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
-        
-        const midX = canvas.width / 2;
-        const midY = canvas.height / 2;
-
-        const allChildren = [...state.siblings, state.ip].sort((a, b) => a.birth - b.birth);
-        const totalW = (allChildren.length - 1) * 170;
-        const startX = midX - totalW / 2;
-
-        allChildren.forEach((child, i) => {
-            drawPerson(startX + (i * 170), midY, child);
-        });
-
-        canvas.renderAll();
-    }
-
-    function updateUI() {
-        const list = document.getElementById('sibling-list');
-        list.innerHTML = state.siblings.map(s => `
-            <div class="sibling-card">
-                <button class="remove-btn" onclick="removeSibling('${s.id}')">삭제</button>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <select onchange="updateSib('${s.id}', 'gender', this.value)">
-                        <option value="male" ${s.gender==='male'?'selected':''}>남성</option>
-                        <option value="female" ${s.gender==='female'?'selected':''}>여성</option>
-                    </select>
-                    <input type="number" value="${s.birth}" onchange="updateSib('${s.id}', 'birth', this.value)">
+            return (
+                <div className={`genogram-node ${data.isIP ? 'ip' : ''} ${data.isDeceased ? 'deceased' : ''}`}>
+                    <div className={shapeClass}></div>
+                    <div className="label-text">
+                        {data.label}<br/>
+                        <span className="text-[10px] text-gray-500">{data.age}</span>
+                    </div>
                 </div>
-                <select onchange="updateSib('${s.id}', 'note', this.value)">
-                    <option value="">특이사항 없음</option>
-                    <option value="psych_issue">심리적 문제</option>
-                    <option value="deceased">사망</option>
-                </select>
-            </div>
-        `).join('');
-    }
+            );
+        };
 
-    function saveImage() {
-        const dataURL = canvas.toDataURL({ format: 'png', multiplier: 3 });
-        const link = document.createElement('a');
-        link.download = `Genogram_v3_${state.ip.birth}.png`;
-        link.href = dataURL;
-        link.click();
-    }
+        // --- 2. 커스텀 엣지: 정서적 역동(갈등, 밀착) 구현 ---
+        const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }) => {
+            const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
+            
+            // 갈등(Zigzag) 스타일링
+            if (data?.type === 'conflict') {
+                return <path id={id} d={edgePath} fill="none" stroke="#ef4444" strokeWidth={3} strokeDasharray="5,5" />;
+            }
+            // 밀착(Triple) 스타일링
+            if (data?.type === 'fused') {
+                return (
+                    <g>
+                        <path d={edgePath} fill="none" stroke="#3b82f6" strokeWidth={6} />
+                        <path d={edgePath} fill="none" stroke="white" strokeWidth={2} />
+                    </g>
+                );
+            }
+            // 별거/이혼 표시용
+            return <path id={id} d={edgePath} fill="none" stroke="black" strokeWidth={2} />;
+        };
 
-    function resetState() { if(confirm("데이터를 초기화하시겠습니까?")) location.reload(); }
+        const nodeTypes = { genogram: GenogramNode };
+        const edgeTypes = { genogramEdge: CustomEdge };
 
-    updateUI();
-    render();
-</script>
+        // --- 3. 레이아웃 엔진 ---
+        const dagreGraph = new dagre.graphlib.Graph();
+        dagreGraph.setDefaultEdgeLabel(() => ({}));
+        const getLayoutedElements = (nodes, edges) => {
+            dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 140 });
+            nodes.forEach(n => dagreGraph.setNode(n.id, { width: 100, height: 100 }));
+            edges.forEach(e => dagreGraph.setEdge(e.source, e.target));
+            dagre.layout(dagreGraph);
+            return nodes.map(n => ({ ...n, position: { x: dagreGraph.node(n.id).x - 50, y: dagreGraph.node(n.id).y - 50 } }));
+        };
+
+        function App() {
+            const [input, setInput] = useState("# 인물: 성별(M/F/T): 이름 [나이, 속성]\nM: 할아버지 [75, 사망]\nF: 할머니 [72]\nM: 아버지 [52]\nF: 어머니 [50]\nM: 나 [IP, 27]\nF: 여동생 [24]\n\n# 관계: 연동부호(->, ==, ~, ===)\n할아버지 == 할머니 [결혼]\n아버지 == 어머니 [결혼]\n할아버지 -> 아버지\n어머니 -> 나\n아버지 -> 나\n나 ~ 아버지 [갈등]\n나 === 여동생 [밀착]");
+            const [nodes, setNodes, onNodesChange] = useNodesState([]);
+            const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+            useEffect(() => {
+                const lines = input.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+                const newNodes = []; const newEdges = []; const nodeSet = new Set();
+
+                lines.forEach((line, i) => {
+                    const define = line.match(/^(M|F|T): (.+?)(\s*\[(.+?)\])?$/);
+                    if (define) {
+                        const [, gender, name, , attrStr] = define;
+                        const attrs = attrStr ? attrStr.split(',').map(a => a.trim()) : [];
+                        nodeSet.add(name);
+                        newNodes.push({
+                            id: name, type: 'genogram',
+                            data: { label: name, gender, isIP: attrs.includes('IP'), isDeceased: attrs.includes('사망'), age: attrs.find(a => !isNaN(a)) || "" },
+                            position: { x: 0, y: 0 }
+                        });
+                    }
+                    const rel = line.match(/(.+?)\s*(==|->|~|===)\s*(.+?)(\s*\[(.+?)\])?$/);
+                    if (rel) {
+                        const [, from, op, to, , label] = rel;
+                        let edgeType = 'default';
+                        if (op === '~') edgeType = 'conflict';
+                        if (op === '===') edgeType = 'fused';
+
+                        newEdges.push({
+                            id: `e-${i}`, source: from, target: to, label: label || "",
+                            type: 'genogramEdge', data: { type: edgeType },
+                            markerEnd: op === '->' ? { type: MarkerType.ArrowClosed, color: '#000' } : null
+                        });
+                    }
+                });
+
+                const layouted = getLayoutedElements(newNodes, newEdges);
+                setNodes(layouted); setEdges(newEdges);
+            }, [input]);
+
+            return (
+                <div className="flex h-full w-full bg-slate-50">
+                    <div className="w-80 bg-slate-900 text-white p-5 flex flex-col shadow-2xl z-10">
+                        <h2 className="text-xl font-black text-blue-400 mb-1">Genogram Pro</h2>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">McGoldrick Standard v3.0</p>
+                        
+                        <textarea className="flex-1 bg-slate-800 border border-slate-700 rounded p-3 font-mono text-xs mb-4 outline-none focus:ring-1 focus:ring-blue-500" value={input} onChange={e => setInput(e.target.value)} />
+                        
+                        <div className="bg-slate-800 p-3 rounded text-[10px] text-slate-400 leading-tight">
+                            <p className="font-bold text-blue-300 mb-1">[기호 규칙]</p>
+                            M:남성, F:여성, T:임신<br/>
+                            [IP]:내담자, [사망]:X표시<br/><br/>
+                            <p className="font-bold text-blue-300 mb-1">[관계 규칙]</p>
+                            == : 결혼 (가로선)<br/>
+                            -> : 혈연 (수직선)<br/>
+                            ~  : 갈등 (빨간 점선)<br/>
+                            ===: 밀착 (푸른 삼중선)
+                        </div>
+                    </div>
+                    <div className="flex-1 relative">
+                        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} onNodesChange={onNodesChange} fitView>
+                            <Background color="#e2e8f0" gap={20} />
+                            <Controls />
+                        </ReactFlow>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ReactFlowProvider><App /></ReactFlowProvider>);
+    </script>
 </body>
 </html>
