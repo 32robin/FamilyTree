@@ -3,211 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FamilyTool v1.3 - 가계도 간단하게 그리기(충북대 김병수 제작) </title>
+    <title>FamilyTool Simple v2.1 - 세련된 단순함</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { background-color: #f1f5f9; font-family: 'Pretendard', sans-serif; overflow: hidden; }
-        .sidebar-scroll { height: calc(100vh - 120px); overflow-y: auto; }
-        .canvas-area { background: #ffffff; border-radius: 8px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1); }
-        .attr-section { @apply border-t mt-4 pt-4; }
-        .status-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 8px; }
-        label { @apply text-[11px] font-bold text-gray-400 uppercase tracking-tighter; }
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { background-color: #f8fafc; font-family: 'Pretendard', sans-serif; overflow: hidden; }
+        #canvas-container { box-shadow: inset 0 0 100px rgba(79, 70, 229, 0.03); background-color: #fff; border-radius: 48px; position: relative; }
+        .floating-menu { position: absolute; display: none; gap: 8px; pointer-events: none; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
+        .menu-btn { pointer-events: auto; width: 36px; height: 36px; border-radius: 12px; background: white; color: #475569; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; }
+        .menu-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; transform: scale(1.1); }
+        .menu-btn.delete:hover { background: #ef4444; border-color: #ef4444; }
+        .start-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        /* 선택된 노드에 부드러운 네온 효과 */
+        .glow-selection { filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.7)); }
     </style>
 </head>
-<body class="p-4">
-    <header class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-black text-indigo-900 px-2">FamilyTool <span class="text-indigo-400 font-light text-sm">Clinical Standard</span></h1>
-        <div class="flex gap-2">
-            <button onclick="downloadImage('png')" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-indigo-700">PNG</button>
-            <button onclick="downloadPDF()" class="bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-red-600">PDF (Case Report)</button>
-            <button onclick="clearCanvas()" class="bg-gray-200 text-gray-600 px-3 py-1.5 rounded text-xs font-bold">초기화</button>
+<body class="p-6 flex flex-col h-screen">
+
+    <header class="flex justify-between items-center mb-8 px-4">
+        <h1 class="text-2xl font-black text-slate-800 tracking-tighter">FamilyTool <span class="font-extralight text-slate-400">Simple v2.1</span></h1>
+        <div class="flex gap-3">
+            <button onclick="downloadImage()" class="px-6 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">저장 (PNG)</button>
+            <button onclick="location.reload()" class="px-6 py-2.5 bg-slate-900 text-white rounded-full text-sm font-bold hover:bg-black transition shadow-sm">새로 만들기</button>
         </div>
     </header>
 
-    <div class="grid grid-cols-12 gap-4">
-        <aside class="col-span-2 sidebar-scroll pr-2">
-            <div class="mb-6">
-                <label>표준 기호</label>
-                <div class="grid grid-cols-1 gap-1 mt-2">
-                    <button onclick="addNode('male')" class="bg-white border p-2 text-xs text-left rounded hover:bg-indigo-50">□ 남성 (Male)</button>
-                    <button onclick="addNode('female')" class="bg-white border p-2 text-xs text-left rounded hover:bg-indigo-50">○ 여성 (Female)</button>
-                    <button onclick="addNode('ip')" class="bg-indigo-50 border-indigo-200 border p-2 text-xs text-left rounded font-bold">▣ 지표 내담자 (IP)</button>
-                </div>
-            </div>
-            <div class="mb-6">
-                <label>생식/기타</label>
-                <div class="grid grid-cols-1 gap-1 mt-2">
-                    <button onclick="addNode('pregnancy')" class="bg-white border p-2 text-xs text-left rounded hover:bg-green-50">△ 임신 (Pregnancy)</button>
-                    <button onclick="addNode('miscarriage')" class="bg-white border p-2 text-xs text-left rounded hover:bg-red-50 text-red-500">• 자연 유산</button>
-                    <button onclick="addNode('abortion')" class="bg-white border p-2 text-xs text-left rounded hover:bg-red-50 text-red-700">✕ 인공 유산</button>
-                </div>
-            </div>
-            <div class="mb-6">
-                <label>관계선 유형</label>
-                <div class="grid grid-cols-1 gap-1 mt-2">
-                    <button onclick="addLine('solid')" class="bg-white border p-2 text-[10px] text-left rounded">── 친밀/결혼</button>
-                    <button onclick="addLine('distant')" class="bg-white border p-2 text-[10px] text-left rounded">- - 소원한 관계</button>
-                    <button onclick="addLine('conflict')" class="bg-white border p-2 text-[10px] text-left rounded text-orange-600">WW 갈등 관계</button>
-                    <button onclick="addLine('cutoff')" class="bg-white border p-2 text-[10px] text-left rounded text-red-600">─| |─ 단절 관계</button>
-                </div>
-            </div>
-        </aside>
+    <div id="canvas-container" class="relative flex-grow border border-slate-100 overflow-hidden shadow-2xl">
+        <canvas id="c"></canvas>
+        
+        <div id="start-screen" class="start-overlay p-10 bg-white/80 backdrop-blur-sm rounded-3xl border border-white shadow-xl">
+            <button onclick="initIP()" class="px-10 py-5 bg-indigo-600 text-white rounded-full text-xl font-black shadow-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                나(IP)부터 시작하기
+            </button>
+            <p class="mt-5 text-slate-500 text-sm font-medium">상담용 간단 가계도를 즉시 시작하세요.</p>
+        </div>
 
-        <aside class="col-span-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100 overflow-y-auto sidebar-scroll">
-            <div id="editPanel" class="hidden">
-                <h2 id="editTitle" class="font-black text-indigo-900 mb-4 border-b pb-2 italic">구성원 속성</h2>
-                
-                <label>기본 정보</label>
-                <input type="text" id="attrName" oninput="sync()" placeholder="이름" class="w-full border rounded p-2 text-sm mb-2 mt-1">
-                <input type="text" id="attrAge" oninput="sync()" placeholder="나이/연도" class="w-full border rounded p-2 text-sm mb-4">
-
-                <div class="attr-section">
-                    <label>임상적 상태 (이미지 반영)</label>
-                    <div class="status-grid mt-2">
-                        <div class="flex items-center gap-2"><input type="checkbox" id="isDead" onchange="sync()"> <span class="text-xs">사망(X)</span></div>
-                        <div class="flex items-center gap-2"><input type="checkbox" id="isLGBT" onchange="sync()"> <span class="text-xs">LGBTQ+</span></div>
-                        <div class="flex items-center gap-2"><input type="checkbox" id="hasDrug" onchange="sync()"> <span class="text-xs">약물남용</span></div>
-                        <div class="flex items-center gap-2"><input type="checkbox" id="hasMental" onchange="sync()"> <span class="text-xs">정신문제</span></div>
-                    </div>
-                </div>
-
-                <div class="attr-section">
-                    <label>학대/폭력 경험</label>
-                    <select id="abuseStatus" onchange="sync()" class="w-full border rounded p-2 text-sm mt-1">
-                        <option value="none">없음</option>
-                        <option value="physical">신체적 학대</option>
-                        <option value="sexual">성적 학대</option>
-                    </select>
-                </div>
+        <div id="node-menu" class="floating-menu flex flex-col">
+            <div class="flex gap-2">
+                <button title="부모 추가" onclick="addRelative('parent')" class="menu-btn">↑</button>
+                <button title="배우자 추가" onclick="addRelative('spouse')" class="menu-btn">→</button>
+                <button title="자녀 추가" onclick="addRelative('child')" class="menu-btn">↓</button>
             </div>
-            <div id="emptyGuide" class="h-full flex items-center justify-center text-gray-400 text-center text-sm italic">
-                기호를 선택하여<br>임상 정보를 입력하세요.
+            <div class="flex gap-2 mt-1 justify-center">
+                <button title="성별 변경" onclick="toggleGender()" class="menu-btn text-xs font-bold">♂/♀</button>
+                <button title="삭제" onclick="deleteNode()" class="menu-btn delete bg-red-50 text-red-500 border-red-100">✕</button>
             </div>
-        </aside>
-
-        <main class="col-span-7">
-            <div class="canvas-area">
-                <canvas id="c" width="850" height="650"></canvas>
-            </div>
-            <div class="mt-4 flex justify-between items-center text-[11px] text-gray-400 bg-white p-3 rounded shadow-sm">
-                <span>* 각 기호를 클릭한 후 중간 창에서 <strong>사망, 약물남용, 정신문제</strong> 등을 체크하면 기호가 즉시 변경됩니다.</span>
-                <span class="font-bold">FamilyTool v1.3 Academic</span>
-            </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        const canvas = new fabric.Canvas('c');
-        let activeObj = null;
+        const container = document.getElementById('canvas-container');
+        const canvas = new fabric.Canvas('c', {
+            width: container.clientWidth,
+            height: container.clientHeight,
+            selection: false
+        });
+        const menu = document.getElementById('node-menu');
+        let activeNode = null;
 
-        // 1. 기호 추가 로직 (이미지 분석 반영)
-        function addNode(type) {
-            const props = { stroke: 'black', strokeWidth: 2, fill: 'white' };
+        // 1. IP 생성 (최초 시작)
+        function initIP() {
+            document.getElementById('start-screen').style.display = 'none';
+            // 화면 중앙에 IP 생성
+            createPerson(canvas.width / 2, canvas.height / 2, '나(IP)', 'male', true);
+        }
+
+        // 2. 인물 노드 생성 함수 (디자인 고도화)
+        function createPerson(x, y, label, gender, isIP = false) {
+            const props = { stroke: '#475569', strokeWidth: 3, fill: 'white', originX: 'center', originY: 'center' };
             let shape;
-
-            if (type === 'male') shape = new fabric.Rect({ ...props, width: 50, height: 50 });
-            else if (type === 'female') shape = new fabric.Circle({ ...props, radius: 25 });
-            else if (type === 'ip') {
-                const b1 = new fabric.Rect({ ...props, width: 55, height: 55 });
-                const b2 = new fabric.Rect({ ...props, width: 45, height: 45, left: 5, top: 5 });
-                shape = new fabric.Group([b1, b2]);
-            }
-            else if (type === 'pregnancy') shape = new fabric.Triangle({ ...props, width: 40, height: 40 });
-            else if (type === 'miscarriage') shape = new fabric.Circle({ ...props, radius: 5, fill: 'black' });
-            else if (type === 'abortion') {
-                shape = new fabric.IText('✕', { fontSize: 30, fontWeight: 'bold' });
+            
+            if (gender === 'male') {
+                shape = new fabric.Rect({ ...props, width: 55, height: 55 });
+            } else {
+                shape = new fabric.Circle({ ...props, radius: 27.5 });
             }
 
-            const label = new fabric.IText('이름(나이)', {
-                fontSize: 12, top: 60, left: 25, originX: 'center', fontWeight: 'bold'
+            // IP 이중 기호 (정교한 둥근 사각형/원형)
+            if (isIP) {
+                const inner = (gender === 'male')
+                    ? new fabric.Rect({ ...props, width: 45, height: 45, strokeWidth: 1.5 })
+                    : new fabric.Circle({ ...props, radius: 22.5, strokeWidth: 1.5 });
+                shape = new fabric.Group([shape, inner], { originX: 'center', originY: 'center' });
+            }
+
+            // 텍스트 디자인 (더 짙은 색)
+            const text = new fabric.IText(label, {
+                fontSize: 14,
+                fontWeight: 'bold',
+                top: 48,
+                left: 0,
+                originX: 'center',
+                fill: '#1e293b'
             });
 
-            const group = new fabric.Group([shape, label], {
-                left: 100, top: 100,
-                data: { type, name: '', age: '', isDead: false, isLGBT: false, hasDrug: false, hasMental: false, abuse: 'none' }
+            const group = new fabric.Group([shape, text], {
+                left: x,
+                top: y,
+                originX: 'center',
+                originY: 'center',
+                hasControls: false,
+                hasBorders: false,
+                data: { gender, isIP }
             });
 
             canvas.add(group);
-            canvas.setActiveObject(group);
+            return group;
         }
 
-        // 2. 실시간 싱크 (핵심: 이미지의 패턴 구현)
-        function sync() {
-            if (!activeObj) return;
-            const data = activeObj.data;
-            data.name = document.getElementById('attrName').value;
-            data.age = document.getElementById('attrAge').value;
-            data.isDead = document.getElementById('isDead').checked;
-            data.isLGBT = document.getElementById('isLGBT').checked;
-            data.hasDrug = document.getElementById('hasDrug').checked;
-            data.hasMental = document.getElementById('hasMental').checked;
-            data.abuse = document.getElementById('abuseStatus').value;
+        // 3. 관계 추가 로직 (클릭한 방향에 따라 자동 생성 및 연결)
+        function addRelative(relType) {
+            if (!activeNode) return;
+            
+            const offset = 180; // 간격 조금 더 넓힘
+            let nx = activeNode.left;
+            let ny = activeNode.top;
+            let nGender = activeNode.data.gender === 'male' ? 'female' : 'male';
+            let nLabel = '';
 
-            const mainShape = activeObj.item(0);
-            const label = activeObj.item(1);
+            if (relType === 'parent') { ny -= offset; nLabel = '부모'; nGender = 'female'; }
+            else if (relType === 'spouse') { nx += offset; nLabel = '배우자'; }
+            else if (relType === 'child') { ny += offset; nLabel = '자녀'; }
 
-            // 텍스트 업데이트
-            label.set('text', `${data.name}(${data.age})`);
-
-            // 상태 표현 (색상 및 오버레이)
-            // 1) 약물 남용 (이미지처럼 아래쪽 절반 채우기 시뮬레이션)
-            if (data.hasDrug) mainShape.set('fill', '#e2e8f0'); 
-            else mainShape.set('fill', 'white');
-
-            // 2) 사망 표시 (X)
-            if (data.isDead) {
-                activeObj.add(new fabric.Line([0, 0, 50, 50], { stroke: 'black', strokeWidth: 1 }));
-                activeObj.add(new fabric.Line([50, 0, 0, 50], { stroke: 'black', strokeWidth: 1 }));
-            }
-
-            canvas.renderAll();
-        }
-
-        // 3. 관계선 (이미지 분석 반영)
-        function addLine(style) {
-            let lineProps = { stroke: 'black', strokeWidth: 2 };
-            if (style === 'distant') lineProps.strokeDashArray = [5, 5];
-            if (style === 'cutoff') lineProps.strokeWidth = 4; // 실제는 끊어진 선 로직 필요
-
-            const line = new fabric.Line([100, 100, 300, 100], lineProps);
+            const newNode = createPerson(nx, ny, nLabel, nGender);
+            
+            // 세련된 선 연결 (Slate Gray)
+            const line = new fabric.Line([activeNode.left, activeNode.top, nx, ny], {
+                stroke: '#cbd5e1',
+                strokeWidth: 2,
+                selectable: false,
+                evented: false
+            });
             canvas.add(line);
+            line.sendToBack();
+            
+            hideMenu();
         }
 
-        // UI 핸들러
-        canvas.on('selection:created', (e) => {
-            activeObj = e.selected[0];
-            document.getElementById('editPanel').classList.remove('hidden');
-            document.getElementById('emptyGuide').classList.add('hidden');
-            // 필드 채우기
-            document.getElementById('attrName').value = activeObj.data.name;
-            document.getElementById('attrAge').value = activeObj.data.age;
-            document.getElementById('isDead').checked = activeObj.data.isDead;
-            document.getElementById('hasDrug').checked = activeObj.data.hasDrug;
+        // 4. 성별 변경 토글 기능
+        function toggleGender() {
+            if (!activeNode) return;
+            const data = activeNode.data;
+            const newGender = data.gender === 'male' ? 'female' : 'male';
+            const label = activeNode.item(1).text; // 기존 이름 유지
+            const isIP = data.isIP;
+            const { left, top } = activeNode;
+
+            canvas.remove(activeNode);
+            const newNode = createPerson(left, top, label, newGender, isIP);
+            canvas.setActiveObject(newNode);
+            hideMenu(); // 메뉴 위치 갱신을 위해 닫기
+        }
+
+        // 5. 노드 클릭 이벤트 및 메뉴 표시
+        canvas.on('mouse:down', function(options) {
+            if (options.target && options.target.type === 'group') {
+                activeNode = options.target;
+                
+                // 선택된 노드에 시각적 효과 (임시: 캔버스 외곽선으로 표시)
+                // 실제 DOM 필터는 캔버스 밖 메뉴에 적용
+                const zoom = canvas.getZoom();
+                
+                menu.style.display = 'flex';
+                menu.style.left = (activeNode.left * zoom - 60) + 'px'; // 중앙 정렬
+                menu.style.top = (activeNode.top * zoom + 50) + 'px'; // 아래에 표시
+                
+            } else {
+                hideMenu();
+            }
         });
 
-        canvas.on('selection:cleared', () => {
-            document.getElementById('editPanel').classList.add('hidden');
-            document.getElementById('emptyGuide').classList.remove('hidden');
-        });
+        function hideMenu() {
+            menu.style.display = 'none';
+            activeNode = null;
+        }
 
-        function downloadImage(ext) {
+        function deleteNode() {
+            if (activeNode) {
+                canvas.remove(activeNode);
+                hideMenu();
+            }
+        }
+
+        function downloadImage() {
+            const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
             const link = document.createElement('a');
-            link.download = `FamilyTool_Case_${Date.now()}.${ext}`;
-            link.href = canvas.toDataURL({ format: ext });
+            link.download = 'Genogram_Modern Simple.png';
+            link.href = dataURL;
             link.click();
         }
 
-        function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('l', 'mm', 'a4');
-            pdf.text("Family Genogram Case Report", 10, 10);
-            pdf.addImage(canvas.toDataURL(), 'PNG', 10, 20, 270, 160);
-            pdf.save('Case_Genogram.pdf');
-        }
-
-        function clearCanvas() { if(confirm("전체 삭제하시겠습니까?")) canvas.clear(); }
+        // 창 크기 조절 대응
+        window.addEventListener('resize', () => {
+            canvas.setWidth(container.clientWidth);
+            canvas.setHeight(container.clientHeight);
+            canvas.renderAll();
+        });
     </script>
 </body>
 </html>
