@@ -3,218 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genogram Pro (McGoldrick Standard) - 충북대 김병수</title>
+    <title>FamilyTool v2.7 - 실시간 한국형 가계도</title>
     
-    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👪</text></svg>">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/reactflow.browser.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap');
-        body, html, #root { height: 100%; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; overflow: hidden; background-color: #f8fafc; }
-        
-        /* 임상 표준 가계도 노드 스타일 */
-        .genogram-node { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 60px; height: 60px; }
-        .shape { border: 2px solid black; background: white; box-sizing: border-box; }
-        .label-container { position: absolute; top: 100%; margin-top: 8px; width: 120px; text-align: center; line-height: 1.2; z-index: 5; }
-        .label-name { font-size: 13px; font-weight: 800; color: #1e293b; }
-        .label-age { font-size: 11px; color: #64748b; font-weight: 500; }
-
-        /* 남성: 정사각형 / 여성: 원형 / 임신: 삼각형 */
-        .male .shape { width: 45px; height: 45px; }
-        .female .shape { width: 48px; height: 48px; border-radius: 50%; }
-        .pregnancy .shape { width: 0; height: 0; border-left: 24px solid transparent; border-right: 24px solid transparent; border-bottom: 42px solid black; background: transparent; border-top: 0; border-right-width: 24px; border-left-width: 24px; }
-        .pregnancy .shape::after { content: ''; position: absolute; left: -20px; top: 3px; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 36px solid white; }
-
-        /* IP (내담자): 이중 테두리 */
-        .ip .shape { border-width: 6px; border-style: double; }
-        /* 사망: X 표시 */
-        .deceased::before { content: 'X'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: 200; color: #000; z-index: 2; pointer-events: none; }
-
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { background-color: #f8fafc; font-family: 'Pretendard', sans-serif; overflow: hidden; }
+        .sidebar { height: 100vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .sidebar::-webkit-scrollbar { display: none; }
+        .input-card { @apply bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-5 transition-all hover:shadow-md; }
+        label { @apply block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-tighter; }
+        input, select { @apply w-full border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-3 transition-all; }
+        .section-title { @apply text-base font-black text-slate-800 mb-4 flex justify-between items-center; }
+        .btn-primary { @apply w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-black transition-all transform hover:-translate-y-0.5 active:translate-y-0; }
+        .canvas-container { background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 30px 30px; }
     </style>
 </head>
-<body>
-    <div id="root">
-        <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; gap:15px; color:#475569;">
-            <div style="width: 30px; height: 30px; border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-            <p style="font-weight:bold;">McGoldrick 가계도 엔진을 안정적으로 불러오는 중...</p>
+<body class="flex">
+
+    <aside class="w-1/3 sidebar p-8 border-r bg-white/60 backdrop-blur-xl">
+        <header class="mb-10">
+            <h1 class="text-2xl font-black text-indigo-950 tracking-tighter italic">FamilyTool <span class="font-light text-slate-400 text-lg not-italic">v2.7</span></h1>
+            <p class="text-xs text-slate-500 mt-1 font-semibold uppercase tracking-widest">Academic Case Formulation</p>
+        </header>
+
+        <div class="input-card border-l-4 border-l-indigo-600">
+            <h2 class="section-title text-indigo-900">내담자 (Client)</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label>성별</label>
+                    <select id="ip-gender" onchange="render()">
+                        <option value="female" selected>여성 (○)</option>
+                        <option value="male">남성 (□)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>출생연도</label>
+                    <input type="text" id="ip-birth" oninput="render()" placeholder="1999">
+                </div>
+            </div>
+            <label>직업</label>
+            <input type="text" id="ip-job" oninput="render()" placeholder="대학원생" class="mb-0">
         </div>
-    </div>
-    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
 
-    <script type="text/babel">
-        // 2. 라이브러리 안정성 검증 함수
-        const initApp = () => {
-            if (!window.ReactFlow || !window.dagre) {
-                setTimeout(initApp, 50);
-                return;
+        <div class="input-card">
+            <h2 class="section-title">부모</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="text-blue-600">아버지</label>
+                    <input type="text" id="fa-birth" oninput="render()" placeholder="연도">
+                    <input type="text" id="fa-job" oninput="render()" placeholder="직업" class="mb-0">
+                </div>
+                <div>
+                    <label class="text-pink-600">어머니</label>
+                    <input type="text" id="mo-birth" oninput="render()" placeholder="연도">
+                    <input type="text" id="mo-job" oninput="render()" placeholder="직업" class="mb-0">
+                </div>
+            </div>
+            <div class="mt-4 flex gap-4 pt-4 border-t border-slate-50">
+                <div class="flex items-center gap-2"><input type="checkbox" id="fa-adoptive" onchange="render()"> <span class="text-[11px] font-bold text-slate-500">양부</span></div>
+                <div class="flex items-center gap-2"><input type="checkbox" id="mo-adoptive" onchange="render()"> <span class="text-[11px] font-bold text-slate-500">양모</span></div>
+            </div>
+        </div>
+
+        <div class="input-card">
+            <div class="section-title">
+                <span>형제자매</span>
+                <button onclick="addSibling()" class="text-[10px] bg-indigo-600 text-white px-3 py-1.5 rounded-full font-bold hover:bg-indigo-700 transition">+ 추가</button>
+            </div>
+            <div id="sibling-list" class="space-y-3"></div>
+        </div>
+
+        <div class="input-card">
+            <h2 class="section-title">선택 사항</h2>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 border rounded-xl hover:bg-slate-50 transition">
+                    <span class="text-xs font-bold text-slate-600">배우자 정보</span>
+                    <input type="checkbox" id="show-spouse" onchange="render()" class="w-4 h-4">
+                </div>
+                <div id="spouse-info" class="hidden pl-2 border-l-2 mb-2">
+                    <input type="text" id="sp-birth" oninput="render()" placeholder="배우자 출생연도" class="text-xs">
+                    <input type="text" id="sp-job" oninput="render()" placeholder="배우자 직업" class="text-xs mb-0">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex items-center gap-2 p-2 border rounded-xl"><input type="checkbox" id="show-gp" onchange="render()"> <span class="text-[10px] font-bold">친조부모</span></div>
+                    <div class="flex items-center gap-2 p-2 border rounded-xl"><input type="checkbox" id="show-mgp" onchange="render()"> <span class="text-[10px] font-bold">외조부모</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2 mb-10">
+            <button onclick="downloadPNG()" class="btn-primary">이미지 저장 (PNG)</button>
+            <button onclick="downloadPDF()" class="w-full bg-white border border-slate-200 text-slate-600 py-3 rounded-2xl font-bold text-xs hover:bg-slate-50 transition">PDF 리포트 저장</button>
+        </div>
+    </aside>
+
+    <main class="w-2/3 h-full relative canvas-container">
+        <div id="canvas-wrapper" class="w-full h-full">
+            <canvas id="c"></canvas>
+        </div>
+        <div class="absolute bottom-8 right-8 flex flex-col items-end">
+            <div class="bg-white/90 backdrop-blur px-4 py-2 rounded-2xl border shadow-sm flex items-center gap-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Live Rendering Active</span>
+            </div>
+            <p class="text-[10px] text-slate-300 mt-2 font-medium">FamilyTool Academic v2.7 | Byungsu Kim</p>
+        </div>
+    </main>
+
+    <script>
+        const wrapper = document.getElementById('canvas-wrapper');
+        const canvas = new fabric.Canvas('c', { 
+            width: wrapper.clientWidth, 
+            height: wrapper.clientHeight,
+            backgroundColor: 'transparent'
+        });
+        
+        let siblings = [];
+
+        function addSibling() {
+            const id = Date.now();
+            siblings.push({ id, type: 'brother', birth: '', job: '' });
+            updateSiblingUI();
+            render();
+        }
+
+        function removeSibling(id) {
+            siblings = siblings.filter(s => s.id !== id);
+            updateSiblingUI();
+            render();
+        }
+
+        function updateSiblingUI() {
+            const list = document.getElementById('sibling-list');
+            list.innerHTML = siblings.map(s => `
+                <div class="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 relative group">
+                    <button onclick="removeSibling(${s.id})" class="absolute top-2 right-3 text-slate-300 hover:text-red-500 font-bold transition">✕</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select onchange="updateSib(${s.id}, 'type', this.value); render();" class="text-xs mb-0">
+                            <option value="brother" ${s.type==='brother'?'selected':''}>형(오빠)/남동생</option>
+                            <option value="sister" ${s.type==='sister'?'selected':''}>누나(언니)/여동생</option>
+                        </select>
+                        <input type="text" oninput="updateSib(${s.id}, 'birth', this.value); render();" value="${s.birth}" placeholder="출생연도" class="text-xs mb-0">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSib(id, key, val) {
+            const sib = siblings.find(s => s.id === id);
+            if (sib) sib[key] = val;
+        }
+
+        // --- 실시간 가계도 엔진 ---
+        function render() {
+            canvas.clear();
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 + 80;
+
+            // 배우자 입력창 토글
+            document.getElementById('spouse-info').style.display = document.getElementById('show-spouse').checked ? 'block' : 'none';
+
+            // 1. 내담자 (Center)
+            const ipGen = document.getElementById('ip-gender').value;
+            const ipBirth = document.getElementById('ip-birth').value;
+            const ipJob = document.getElementById('ip-job').value;
+            drawPerson(centerX, centerY, ipGen, `내담자\n(${ipBirth})\n${ipJob}`, true);
+
+            // 2. 부모 (Parents)
+            const faBirth = document.getElementById('fa-birth').value;
+            const faJob = document.getElementById('fa-job').value;
+            const moBirth = document.getElementById('mo-birth').value;
+            const moJob = document.getElementById('mo-job').value;
+            
+            const faX = centerX - 120, moX = centerX + 120, pY = centerY - 200;
+            drawPerson(faX, pY, 'male', `부\n(${faBirth})\n${faJob}`, false, document.getElementById('fa-adoptive').checked);
+            drawPerson(moX, pY, 'female', `모\n(${moBirth})\n${moJob}`, false, document.getElementById('mo-adoptive').checked);
+            
+            // 부모 연결 실선
+            canvas.add(new fabric.Line([faX, pY, moX, pY], { stroke: '#cbd5e1', strokeWidth: 2 }));
+            canvas.add(new fabric.Line([centerX, pY, centerX, centerY - 45], { stroke: '#cbd5e1', strokeWidth: 2 }));
+
+            // 3. 형제자매 (Siblings) - 내담자 기준 좌우 배치 (나이순 가정)
+            siblings.forEach((s, i) => {
+                const xPos = centerX + 240 + (i * 130);
+                drawPerson(xPos, centerY, s.type === 'brother' ? 'male' : 'female', `${s.type === 'brother'?'형제':'자매'}\n(${s.birth})`);
+                // 수평 연결선에서 가지 뻗기
+                canvas.add(new fabric.Line([centerX, centerY - 100, xPos, centerY - 45], { stroke: '#e2e8f0', strokeWidth: 1.5 }));
+            });
+
+            // 4. 배우자 (Spouse)
+            if (document.getElementById('show-spouse').checked) {
+                const spBirth = document.getElementById('sp-birth').value;
+                const spJob = document.getElementById('sp-job').value;
+                const spGen = ipGen === 'male' ? 'female' : 'male';
+                drawPerson(centerX + 120, centerY, spGen, `배우자\n(${spBirth})\n${spJob}`);
+                canvas.add(new fabric.Line([centerX, centerY, centerX + 60, centerY], { stroke: '#94a3b8', strokeWidth: 2 }));
             }
 
-            const { useState, useEffect, useCallback, useRef } = React;
-            const { ReactFlow, ReactFlowProvider, useNodesState, useEdgesState, MarkerType, Background, Controls, Panel, getBezierPath } = window.ReactFlow;
-
-            // --- [임상 표준] 커스텀 노드 ---
-            const GenogramNode = ({ data }) => {
-                let genderClass = "male";
-                if (data.gender === 'F') genderClass = "female";
-                if (data.gender === 'T') genderClass = "pregnancy";
-
-                return (
-                    <div className={`genogram-node ${genderClass} ${data.isIP ? 'ip' : ''} ${data.isDeceased ? 'deceased' : ''}`}>
-                        <div className="shape"></div>
-                        <div className="label-container">
-                            <div className="label-name">{data.label}</div>
-                            <div className="label-age">{data.age ? `${data.age}세` : ''}</div>
-                        </div>
-                    </div>
-                );
-            };
-
-            // --- [임상 표준] 커스텀 엣지 (정서적 관계) ---
-            const GenogramEdge = ({ id, sourceX, sourceY, targetX, targetY, data }) => {
-                const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
-                
-                if (data?.type === 'conflict') { // 갈등: 빨간 지그재그 점선
-                    return <path id={id} d={edgePath} fill="none" stroke="#ef4444" strokeWidth={3} strokeDasharray="5,5" />;
-                }
-                if (data?.type === 'fused') { // 밀착: 굵은 이중선
-                    return (
-                        <g>
-                            <path d={edgePath} fill="none" stroke="#3b82f6" strokeWidth={7} />
-                            <path d={edgePath} fill="none" stroke="white" strokeWidth={2} />
-                        </g>
-                    );
-                }
-                return <path id={id} d={edgePath} fill="none" stroke="#000" strokeWidth={1.5} />;
-            };
-
-            const nodeTypes = { genogram: GenogramNode };
-            const edgeTypes = { gEdge: GenogramEdge };
-
-            // 레이아웃 설정
-            const dagreGraph = new dagre.graphlib.Graph();
-            dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-            const applyLayout = (nodes, edges) => {
-                dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 140 });
-                nodes.forEach(n => dagreGraph.setNode(n.id, { width: 100, height: 100 }));
-                edges.forEach(e => dagreGraph.setEdge(e.source, e.target));
-                dagre.layout(dagreGraph);
-                return nodes.map(n => ({ ...n, position: { x: dagreGraph.node(n.id).x - 50, y: dagreGraph.node(n.id).y - 50 } }));
-            };
-
-            function App() {
-                const [input, setInput] = useState("# 인물정의(M/F/T): 이름 [나이, 속성]\nM: 할아버지 [78, 사망]\nF: 할머니 [75]\nM: 아버지 [52]\nF: 어머니 [49]\nM: 나 [IP, 26]\nF: 여동생 [23]\n\n# 관계연결: ->(혈연), ==(결혼), ~(갈등), ===(밀착)\n할아버지 == 할머니 [결혼]\n아버지 == 어머니 [결혼]\n아버지 -> 나\n어머니 -> 나\n나 ~ 아버지 [갈등]\n나 === 여동생 [밀착]");
-                const [nodes, setNodes, onNodesChange] = useNodesState([]);
-                const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-                const [error, setError] = useState("");
-
-                useEffect(() => {
-                    try {
-                        const lines = input.split('\n').filter(l => l.trim() && !l.startsWith('#'));
-                        const tNodes = []; const tEdges = []; const nodeNames = new Set();
-
-                        lines.forEach((line, i) => {
-                            const def = line.match(/^(M|F|T): (.+?)(\s*\[(.+?)\])?$/);
-                            if (def) {
-                                const [, gender, name, , attrStr] = def;
-                                const attrs = attrStr ? attrStr.split(',').map(a => a.trim()) : [];
-                                nodeNames.add(name.trim());
-                                tNodes.push({
-                                    id: name.trim(), type: 'genogram',
-                                    data: { 
-                                        label: name.trim(), gender, 
-                                        isIP: attrs.includes('IP'), 
-                                        isDeceased: attrs.includes('사망'),
-                                        age: attrs.find(a => !isNaN(a)) || "" 
-                                    },
-                                    position: { x: 0, y: 0 }
-                                });
-                                return;
-                            }
-                            const rel = line.match(/(.+?)\s*(==|->|~|===)\s*(.+?)(\s*\[(.+?)\])?$/);
-                            if (rel) {
-                                const [, from, op, to, , label] = rel.map(s => s?.trim());
-                                if (!nodeNames.has(from) || !nodeNames.has(to)) return;
-                                
-                                let type = 'default';
-                                if (op === '~') type = 'conflict';
-                                if (op === '===') type = 'fused';
-
-                                tEdges.push({
-                                    id: `e-${i}`, source: from, target: to, label: label || "",
-                                    type: 'gEdge', data: { type },
-                                    markerEnd: op === '->' ? { type: MarkerType.ArrowClosed, color: '#000' } : null
-                                });
-                            }
-                        });
-                        setNodes(applyLayout(tNodes, tEdges));
-                        setEdges(tEdges);
-                        setError("");
-                    } catch (e) { setError("문법을 확인해주세요."); }
-                }, [input]);
-
-                const saveImage = async () => {
-                    const el = document.querySelector('.react-flow__viewport');
-                    const dataUrl = await htmlToImage.toPng(el, { backgroundColor: '#ffffff', pixelRatio: 2 });
-                    const link = document.createElement('a');
-                    link.download = `Genogram_${Date.now()}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                };
-
-                return (
-                    <div className="flex h-screen w-full">
-                        <div className="w-80 bg-slate-900 flex flex-col shadow-2xl z-20 text-slate-300">
-                            <div className="p-6 border-b border-slate-800">
-                                <h1 className="text-xl font-black text-white tracking-tight">Genogram Pro</h1>
-                                <p className="text-[10px] text-blue-400 font-bold uppercase mt-1">McGoldrick Standard v3.5</p>
-                            </div>
-                            <div className="flex-1 p-5 overflow-y-auto sidebar-scroll">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Data Syntax</label>
-                                <textarea className="w-full h-64 bg-slate-800 border border-slate-700 rounded p-3 font-mono text-xs focus:ring-1 focus:ring-blue-500 outline-none" value={input} onChange={e => setInput(e.target.value)} />
-                                {error && <p className="text-red-400 text-[10px] mt-2 font-bold">{error}</p>}
-                                
-                                <div className="mt-6 space-y-4">
-                                    <button onClick={saveImage} className="w-full bg-white text-slate-900 py-3 rounded font-black text-xs hover:bg-blue-50 transition-all">이미지 추출 (.PNG)</button>
-                                    <div className="bg-slate-800/50 p-4 rounded border border-slate-700 text-[10px] leading-relaxed">
-                                        <p className="text-blue-400 font-bold mb-2 underline">표준 규칙 가이드</p>
-                                        • M:남성, F:여성, T:임신<br/>
-                                        • [IP]:내담자, [사망]:X표시<br/>
-                                        • ==:결혼, ->:혈연<br/>
-                                        • ~:갈등(빨간점선), ===:밀착(삼중선)
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-4 text-center border-t border-slate-800 text-[10px] font-bold text-slate-600">
-                                충북대 심리학과 김병수 제작
-                            </div>
-                        </div>
-                        <div className="flex-1 relative">
-                            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView>
-                                <Background color="#cbd5e1" gap={25} />
-                                <Controls />
-                                <Panel position="top-right" className="bg-white/80 p-2 rounded text-[10px] font-bold border">Interactive Preview</Panel>
-                            </ReactFlow>
-                        </div>
-                    </div>
-                );
+            // 5. 조부모 (Grandparents)
+            if (document.getElementById('show-gp').checked) {
+                drawPerson(faX - 40, pY - 120, 'male', '조부');
+                drawPerson(faX + 40, pY - 120, 'female', '조모');
+            }
+            if (document.getElementById('show-mgp').checked) {
+                drawPerson(moX - 40, pY - 120, 'male', '외조부');
+                drawPerson(moX + 40, pY - 120, 'female', '외조모');
             }
 
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<ReactFlowProvider><App /></ReactFlowProvider>);
-        };
+            canvas.renderAll();
+        }
 
-        // 즉시 실행
-        initApp();
+        function drawPerson(x, y, gender, info = '', isIP = false, isAdoptive = false) {
+            const size = 65;
+            const style = { stroke: '#1e293b', strokeWidth: 3, fill: 'white', originX: 'center', originY: 'center' };
+            if (isAdoptive) { style.strokeDashArray = [5, 5]; style.stroke = '#94a3b8'; }
+            
+            let shape;
+            if (gender === 'male') shape = new fabric.Rect({ ...style, width: size, height: size });
+            else shape = new fabric.Circle({ ...style, radius: size / 2 });
+
+            if (isIP) {
+                const innerStyle = { ...style, strokeWidth: 1.5 };
+                const inner = (gender === 'male') 
+                    ? new fabric.Rect({ ...innerStyle, width: size - 14, height: size - 14 }) 
+                    : new fabric.Circle({ ...innerStyle, radius: (size / 2) - 7 });
+                shape = new fabric.Group([shape, inner], { originX: 'center', originY: 'center' });
+            }
+
+            const text = new fabric.Text(info, { 
+                fontSize: 12, top: 60, textAlign: 'center', originX: 'center', 
+                fill: isIP ? '#1e293b' : '#64748b', 
+                fontWeight: isIP ? '900' : '500', lineHeight: 1.3
+            });
+            
+            const group = new fabric.Group([shape, text], { left: x, top: y, originX: 'center', originY: 'center' });
+            canvas.add(group);
+        }
+
+        function downloadPNG() {
+            const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
+            const link = document.createElement('a');
+            link.download = `FamilyTool_Genogram_${Date.now()}.png`;
+            link.href = dataURL;
+            link.click();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            pdf.setFontSize(18);
+            pdf.text("Genogram Case Report", 15, 20);
+            const imgData = canvas.toDataURL({ format: 'png' });
+            pdf.addImage(imgData, 'PNG', 15, 30, 260, 150);
+            pdf.save('Genogram_Report.pdf');
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.setWidth(wrapper.clientWidth);
+            canvas.setHeight(wrapper.clientHeight);
+            render();
+        });
+
+        // 시작
+        render();
     </script>
 </body>
 </html>
