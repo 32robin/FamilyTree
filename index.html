@@ -3,790 +3,692 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가계도 그리기(문의: 32robin@naver.com)</title>
+<title>가계도 그리기 v2</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#fff;--sf:#fafafa;--sf2:#f0f0f0;--sf3:#e6e6e6;--bd:#d0d0d0;--bdl:#b8b8b8;--tx:#1a1a1a;--txd:#666;--txm:#aaa;--ln:#1a1a1a;--dg:#b91c1c;--ft:'Pretendard',system-ui,-apple-system,sans-serif}
-html,body{width:100%;height:100%;overflow:hidden;font-family:var(--ft);background:#e4e4e4;color:var(--tx)}
+:root{
+  --sf:#f7f7f7;--sf2:#ededed;--sf3:#e0e0e0;--bd:#d0d0d0;--bdl:#aaa;
+  --tx:#1a1a1a;--txd:#666;--txm:#aaa;--ln:#1a1a1a;--dg:#c0392b;
+  --s-me-bg:#f2f7fc;--s-me-ac:#89afd4;--s-me-bd:#c4d7ea;
+  --s-sel-bg:#f0f7f0;--s-sel-ac:#8bbc8b;--s-sel-bd:#c2dac2;
+  --s-couple-bg:#fdf8ee;--s-couple-ac:#d4b86a;--s-couple-bd:#e8dbb8;
+  --s-sib-bg:#fdf2f4;--s-sib-ac:#c98a94;--s-sib-bd:#e4c5cb;
+  --s-add-bg:#f4f0f8;--s-add-ac:#a694bf;--s-add-bd:#d3cce0;
+  --s-tool-bg:#f2f2f2;--s-tool-ac:#888;--s-tool-bd:#d0d0d0;
+  --s-line-bg:#fef4ee;--s-line-ac:#cf9468;--s-line-bd:#e8d0b8;
+  --couple-glow:rgba(212,184,106,.2);--couple-border:#d4b86a;
+  --ft:'Pretendard',system-ui,sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:var(--ft);background:#ddd;color:var(--tx)}
 
-.lpanel{position:fixed;left:0;top:0;bottom:0;width:210px;z-index:100;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column}
-.lp-head{padding:10px 10px 8px;border-bottom:1px solid var(--bd);background:#fff;display:flex;align-items:center;justify-content:space-between}
-.lp-head h1{font-size:12px;font-weight:800;letter-spacing:-.4px}
-.undo-bar{display:flex;gap:2px}
-.undo-btn{width:26px;height:26px;border:1px solid var(--bd);border-radius:3px;background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--tx);font-family:var(--ft);transition:background .1s}
-.undo-btn:hover{background:var(--sf2)}
-.undo-btn:disabled{opacity:.25;cursor:default}
-.lp-scroll{flex:1;overflow-y:auto;overflow-x:hidden}
-.sec{padding:8px 8px 4px}
-.sec h3{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--txm);margin-bottom:5px;padding-left:1px}
-.br{display:flex;flex-direction:column;gap:3px}
-.b{display:flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid var(--bd);border-radius:4px;background:#fff;color:var(--tx);font-size:10.5px;font-weight:500;cursor:pointer;font-family:var(--ft);text-align:left;transition:all .1s;line-height:1.3}
-.b:hover{background:var(--sf2)}
-.b:active{transform:scale(.98)}
+.lp{position:fixed;left:0;top:0;bottom:0;width:264px;z-index:100;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column}
+.lp-hd{padding:14px 16px 10px;border-bottom:1px solid var(--bd);background:#fff;position:relative}
+.lp-hd h1{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.lp-hd .contact{font-size:10px;color:var(--txm);margin-top:2px}
+.lp-hd .undo-bar{position:absolute;right:12px;top:14px;display:flex;gap:3px}
+.ub{width:30px;height:30px;border:1px solid var(--bd);border-radius:4px;background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--tx);font-family:var(--ft)}
+.ub:hover{background:var(--sf2)}.ub:disabled{opacity:.2;cursor:default}
 
-/* icon shapes in buttons */
-.b .i{width:18px;height:18px;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid var(--ln);background:#fff;font-size:9px;position:relative;overflow:visible}
-.b .i.ci{border-radius:50%}
-.b .i.di{width:12px;height:12px;transform:rotate(45deg);border-radius:1px;margin:0 3px}
-.b .i.nb{border:none;background:var(--sf2);font-size:11px;border-radius:3px}
-/* deceased icon: X drawn via pseudo-elements */
-.b .i.xi{position:relative}
-.b .i.xi::before,.b .i.xi::after{content:'';position:absolute;top:50%;left:50%;width:70%;height:1.5px;background:var(--ln)}
-.b .i.xi::before{transform:translate(-50%,-50%) rotate(45deg)}
-.b .i.xi::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.lp-sc{flex:1;overflow-y:auto;overflow-x:hidden}
+.sec{padding:12px 12px 8px;margin:0 0 2px}
+.sec h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;padding:0 0 0 8px;border-left:3.5px solid var(--txm)}
+.br{display:flex;flex-direction:column;gap:4px}
 
-.b.active{background:var(--tx);color:#fff;border-color:var(--tx)}
-.b.active .i{border-color:#fff;background:rgba(255,255,255,.1);color:#fff}
-.b.active .i.nb{background:rgba(255,255,255,.15)}
-.b.da-a{background:var(--dg);color:#fff;border-color:var(--dg)}
-.b.da-a .i{border:none;background:rgba(255,255,255,.15);color:#fff}
+.sec.s-me{background:var(--s-me-bg)}.sec.s-me h3{color:var(--s-me-ac);border-color:var(--s-me-ac)}
+.sec.s-sel{background:var(--s-sel-bg)}.sec.s-sel h3{color:var(--s-sel-ac);border-color:var(--s-sel-ac)}
+.sec.s-couple{background:var(--s-couple-bg)}.sec.s-couple h3{color:var(--s-couple-ac);border-color:var(--s-couple-ac)}
+.sec.s-sib{background:var(--s-sib-bg)}.sec.s-sib h3{color:var(--s-sib-ac);border-color:var(--s-sib-ac)}
+.sec.s-add{background:var(--s-add-bg)}.sec.s-add h3{color:var(--s-add-ac);border-color:var(--s-add-ac)}
+.sec.s-tool{background:var(--s-tool-bg)}.sec.s-tool h3{color:var(--s-tool-ac);border-color:var(--s-tool-ac)}
+.sec.s-line{background:var(--s-line-bg)}.sec.s-line h3{color:var(--s-line-ac);border-color:var(--s-line-ac)}
 
-.me-box{background:#fff;border:1px solid var(--bd);border-radius:4px;margin:0 8px;padding:7px}
-.me-box .ml{font-size:10px;font-weight:700;margin-bottom:4px}
-.gr{display:flex;gap:3px}
-.gb{flex:1;padding:5px 0;border:1px solid var(--bd);border-radius:3px;background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--ft);text-align:center;transition:all .1s}
-.gb:hover{background:var(--sf2)}
-.gb.sel{background:var(--tx);color:#fff;border-color:var(--tx)}
+.b{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--bd);border-radius:5px;background:#fff;color:var(--tx);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--ft);text-align:left;transition:all .12s;line-height:1.3}
+.b:hover{background:var(--sf2)}.b:active{transform:scale(.98)}
+.b .ic{width:24px;height:24px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1.8px solid var(--ln);background:#fff;font-size:10px;position:relative}
+.b .ic.ci{border:none;background:transparent}.b .ic.ci::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;border:1.8px solid var(--ln);background:#fff;top:3px;left:3px}
+.b .ic.nb{border:none;font-size:14px;border-radius:4px}
+.b .ic.xi{border:none;background:transparent}.b .ic.xi::before,.b .ic.xi::after{content:'';position:absolute;top:50%;left:50%;width:16px;height:1.8px;background:var(--ln)}.b .ic.xi::before{transform:translate(-50%,-50%) rotate(45deg)}.b .ic.xi::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.b .ic.zzig{border:none;background:transparent}.b .ic.zzig svg{width:20px;height:12px}
 
-.lp-foot{padding:7px 8px;border-top:1px solid var(--bd);font-size:8.5px;color:var(--txm);line-height:1.7;flex-shrink:0;background:#fff}
-.lp-foot kbd{display:inline-block;padding:0 3px;border-radius:2px;background:var(--sf2);border:1px solid var(--bd);font-size:8px;font-family:var(--ft)}
+.sec.s-me .b .ic.nb{background:var(--s-me-bd);color:var(--s-me-ac)}
+.sec.s-sel .b .ic.nb{background:var(--s-sel-bd);color:var(--s-sel-ac)}
+.sec.s-couple .b .ic.nb{background:var(--s-couple-bd);color:var(--s-couple-ac)}
+.sec.s-sib .b .ic.nb{background:var(--s-sib-bd);color:var(--s-sib-ac)}
+.sec.s-add .b .ic.nb{background:var(--s-add-bd);color:var(--s-add-ac)}
+.sec.s-tool .b .ic.nb{background:var(--s-tool-bd);color:var(--s-tool-ac)}
+.sec.s-line .b .ic.nb{background:var(--s-line-bd);color:var(--s-line-ac)}
 
-/* MIDDLE PANEL */
-.mpanel{position:fixed;left:210px;top:0;bottom:0;width:200px;z-index:90;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column}
-.mp-head{padding:10px;border-bottom:1px solid var(--bd);font-size:11px;font-weight:700}
-.mp-scroll{flex:1;overflow-y:auto;padding:6px}
-.mc{border:1px solid var(--bd);border-radius:4px;padding:6px 8px;margin-bottom:5px;background:var(--sf);cursor:pointer;transition:border-color .1s}
-.mc:hover{border-color:var(--bdl)}
-.mc.sel{border-color:var(--tx);background:#fff}
-.mc-top{display:flex;align-items:center;gap:5px;margin-bottom:5px}
-.mc-ic{width:16px;height:16px;border:1.2px solid var(--ln);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:7px;position:relative}
-.mc-ic.male{border-radius:0}
-.mc-ic.female{border-radius:50%}
-.mc-ic.dec{border-radius:0}
-.mc-ic.dec::after{content:'';position:absolute;inset:-3px;background:linear-gradient(to top right,transparent calc(50% - .5px),var(--ln) calc(50% - .5px),var(--ln) calc(50% + .5px),transparent calc(50% + .5px))}
+.b.active{background:var(--tx);color:#fff;border-color:var(--tx)}.b.active .ic{border-color:#fff;background:rgba(255,255,255,.12);color:#fff}.b.active .ic.nb{background:rgba(255,255,255,.18)}.b.active .ic.ci::before{border-color:#fff}
+.b.da-a{background:var(--dg);color:#fff;border-color:var(--dg)}.b.da-a .ic{border:none;background:rgba(255,255,255,.18);color:#fff}
+
+.me-box{background:#fff;border:1px solid var(--s-me-bd);border-radius:5px;margin:0 12px;padding:10px}
+.me-box .ml{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--s-me-ac)}
+.gr{display:flex;gap:4px}
+.gb{flex:1;padding:8px 0;border:1px solid var(--bd);border-radius:4px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ft);text-align:center;transition:all .1s}
+.gb:hover{background:var(--sf2)}.gb.sel{background:var(--tx);color:#fff;border-color:var(--tx)}
+
+.sel-info{background:#fff;border:1px solid var(--bd);border-radius:5px;margin:0 12px;padding:12px 14px;font-size:13px;color:var(--txd);min-height:36px;line-height:1.5}
+.sel-info strong{color:var(--tx);font-weight:700;font-size:14px}
+.sel-info .ctag{display:inline-block;background:var(--couple-glow);border:1px solid var(--couple-border);border-radius:3px;padding:2px 8px;font-size:11px;font-weight:600;color:#b8860b;margin-left:4px}
+
+.lp-ft{padding:8px 14px;border-top:1px solid var(--bd);font-size:9px;color:var(--txm);line-height:1.7;flex-shrink:0;background:#fff}
+.lp-ft kbd{display:inline-block;padding:0 4px;border-radius:2px;background:var(--sf2);border:1px solid var(--bd);font-size:9px;font-family:var(--ft)}
+
+.mp{position:fixed;left:264px;top:0;bottom:0;width:240px;z-index:90;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column}
+.mp-hd{padding:14px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:700}
+.mp-sc{flex:1;overflow-y:auto;padding:8px}
+.mc{border:1px solid var(--bd);border-radius:5px;padding:8px 10px;margin-bottom:6px;background:var(--sf);cursor:pointer;transition:border-color .1s}
+.mc:hover{border-color:var(--bdl)}.mc.sel{border-color:var(--tx);background:#fff}
+.mc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.mc-ic{width:18px;height:18px;border:1.5px solid var(--ln);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.mc-ic.male{border-radius:0}.mc-ic.female{border-radius:50%}
+.mc-ic.dec::before,.mc-ic.dec::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:1.3px;background:var(--ln);z-index:1}
+.mc-ic.dec::before{transform:translate(-50%,-50%) rotate(45deg)}.mc-ic.dec::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .mc-ic.dec.female{border-radius:50%}
-.mc-ic.unknown{width:11px;height:11px;transform:rotate(45deg);margin:0 2.5px}
-.mc-tt{font-size:10px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mc-del{width:16px;height:16px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--txm);display:flex;align-items:center;justify-content:center;border-radius:2px}
+.mc-tt{font-size:12px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-del{width:20px;height:20px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--txm);display:flex;align-items:center;justify-content:center;border-radius:3px}
 .mc-del:hover{background:var(--sf2);color:var(--dg)}
-.mc-fields{display:flex;flex-direction:column;gap:3px}
-.mc-f{display:flex;align-items:center;gap:3px}
-.mc-f label{font-size:8px;color:var(--txd);width:24px;flex-shrink:0;font-weight:600}
-.mc-f input{flex:1;border:1px solid var(--bd);border-radius:2px;padding:3px 5px;font-size:9.5px;font-family:var(--ft);outline:none;background:#fff}
+.mc-f{display:flex;align-items:center;gap:4px;margin-top:4px}
+.mc-f label{font-size:10px;color:var(--txd);width:28px;flex-shrink:0;font-weight:600}
+.mc-f input{flex:1;border:1px solid var(--bd);border-radius:3px;padding:5px 7px;font-size:12px;font-family:var(--ft);outline:none;background:#fff}
 .mc-f input:focus{border-color:var(--tx)}
 
-/* CANVAS AREA */
-.carea{position:fixed;left:410px;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#e4e4e4;overflow:hidden}
-.carea.connecting{cursor:crosshair}
-.carea.deleting{cursor:not-allowed}
-.a4{width:1122px;height:793px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.1);position:relative;overflow:hidden;transform-origin:center center}
+.ca{position:fixed;left:504px;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#ddd;overflow:hidden}
+.ca.connecting{cursor:crosshair}.ca.deleting{cursor:not-allowed}
+.a4{width:1122px;height:793px;background:#fff;box-shadow:0 2px 24px rgba(0,0,0,.12);position:relative;overflow:hidden;transform-origin:center center}
 .cinr{position:absolute;inset:0;padding:30px 40px}
 .lsvg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.cl{stroke:var(--ln);stroke-width:1.8;fill:none;pointer-events:stroke;cursor:pointer}
-.cl:hover{stroke:var(--dg);stroke-width:2.2}
-.clp{stroke:var(--ln);stroke-width:1.8;fill:none;pointer-events:stroke;cursor:pointer}
-.clp:hover{stroke:var(--dg);stroke-width:2.2}
+.cl{stroke:var(--ln);stroke-width:1.8;fill:none;pointer-events:stroke;cursor:pointer}.cl:hover{stroke:var(--dg);stroke-width:2.2}
+.clp{stroke:var(--ln);stroke-width:1.8;fill:none;pointer-events:stroke;cursor:pointer}.clp:hover{stroke:var(--dg);stroke-width:2.2}
 .tl{stroke:#999;stroke-width:1.2;stroke-dasharray:5 3;fill:none;opacity:.5}
 
-/* NODE */
-.node{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;cursor:grab;user-select:none}
-.node:active{cursor:grabbing}
+.node{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;cursor:ew-resize;user-select:none}
+.node.free-node{cursor:grab}
 .node.dragging{z-index:999!important}
-.node.selected .ns{border-width:2.5px;box-shadow:0 0 0 3px rgba(0,0,0,.08)}
+.node.selected .ns{border-width:2.5px;box-shadow:0 0 0 3px rgba(0,90,200,.12)}
 .node.is-me .ns{border-width:2.5px}
+.node.couple-sel .ns{box-shadow:0 0 0 4px var(--couple-glow);border-color:var(--couple-border)}
+
 .ns{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.8px solid var(--ln);position:relative}
-.node.male .ns{border-radius:0}
-.node.female .ns{border-radius:50%}
-.node.deceased-male .ns{border-radius:0}
-.node.deceased-female .ns{border-radius:50%}
-.node.deceased-male .ns::after,.node.deceased-female .ns::after{content:'';position:absolute;inset:-5px;background:linear-gradient(to top right,transparent calc(50% - .8px),var(--ln) calc(50% - .8px),var(--ln) calc(50% + .8px),transparent calc(50% + .8px));pointer-events:none}
-.node.unknown .ns{width:34px;height:34px;transform:rotate(45deg)}
-
-.ns .age-num{font-size:11px;font-weight:700;color:var(--tx);z-index:2;pointer-events:none}
-.node.unknown .ns .age-num{transform:rotate(-45deg)}
-
-.port{position:absolute;width:12px;height:12px;border-radius:50%;background:transparent;border:none;cursor:crosshair;opacity:0;transition:opacity .12s;z-index:5}
-.node:hover .port,.carea.connecting .port{opacity:1;background:rgba(0,0,0,.06)}
+.node.male .ns{border-radius:0}.node.female .ns{border-radius:50%}
+.node.deceased-male .ns{border-radius:0}.node.deceased-female .ns{border-radius:50%}
+.node.deceased-male .ns::before,.node.deceased-male .ns::after,.node.deceased-female .ns::before,.node.deceased-female .ns::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:1.8px;background:var(--ln);pointer-events:none;z-index:3}
+.node.deceased-male .ns::before,.node.deceased-female .ns::before{transform:translate(-50%,-50%) rotate(45deg)}
+.node.deceased-male .ns::after,.node.deceased-female .ns::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.ns .age-num{font-size:11px;font-weight:700;color:var(--tx);z-index:4;pointer-events:none}
+.port{position:absolute;width:14px;height:14px;border-radius:50%;background:transparent;border:none;cursor:crosshair;opacity:0;transition:opacity .12s;z-index:5}
+.node:hover .port,.ca.connecting .port{opacity:1;background:rgba(0,0,0,.06)}
 .port:hover{background:rgba(0,0,0,.18)!important}
-.port.top{top:-6px;left:50%;margin-left:-6px}
-.port.bottom{bottom:-6px;left:50%;margin-left:-6px}
-.port.left{left:-6px;top:50%;margin-top:-6px}
-.port.right{right:-6px;top:50%;margin-top:-6px}
-.nn{margin-top:3px;padding:1px 3px;border-radius:2px;font-size:9.5px;font-weight:600;color:var(--tx);background:transparent;border:1px solid transparent;min-width:14px;text-align:center;outline:none;cursor:text;white-space:nowrap}
+.port.top{top:-7px;left:50%;margin-left:-7px}.port.bottom{bottom:-7px;left:50%;margin-left:-7px}
+.port.left{left:-7px;top:50%;margin-top:-7px}.port.right{right:-7px;top:50%;margin-top:-7px}
+.nn{margin-top:4px;padding:1px 5px;border-radius:2px;font-size:10px;font-weight:600;color:var(--tx);background:transparent;border:1px solid transparent;min-width:16px;text-align:center;outline:none;cursor:text;white-space:nowrap}
 .nn:focus{border-color:var(--bd);background:#fff}
-.node.unknown .nn{margin-top:8px}
 
-/* TOP BAR */
-.tbar{position:fixed;top:8px;right:12px;z-index:50;display:flex;gap:4px}
-.tb{padding:5px 10px;border:1px solid var(--bd);border-radius:4px;background:#fff;color:var(--tx);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:all .1s}
-.tb:hover{background:var(--sf2)}
-.tb:active{transform:scale(.97)}
-
-/* ZOOM */
-.zc{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;z-index:50;border-radius:4px;overflow:hidden;border:1px solid var(--bd);box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.zb{width:28px;height:26px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:14px;cursor:pointer;font-family:var(--ft)}
-.zb:last-child{border-bottom:none}
-.zb:hover{background:var(--sf2)}
-.zl{font-size:8px;text-align:center;padding:2px 0;color:var(--txd);background:#fff;border-bottom:1px solid var(--bd)}
-
-/* CTX MENU */
-.ctx{position:fixed;z-index:200;background:#fff;border:1px solid var(--bd);border-radius:4px;padding:3px;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.1);display:none}
-.ctx.show{display:block}
-.ci-i{padding:5px 8px;border-radius:3px;font-size:10px;font-weight:500;cursor:pointer;transition:background .08s}
-.ci-i:hover{background:var(--sf2)}
-.ci-i.danger{color:var(--dg)}
-.cs{height:1px;background:var(--bd);margin:2px 5px}
-
-.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--tx);color:#fff;border-radius:4px;padding:5px 14px;font-size:10px;z-index:300;transition:transform .25s ease;pointer-events:none}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-.dd-overlay{position:fixed;inset:0;z-index:150;display:none}.dd-overlay.show{display:block}
-.dd-menu{position:fixed;z-index:151;background:#fff;border:1px solid var(--bd);border-radius:4px;padding:3px;min-width:110px;box-shadow:0 4px 14px rgba(0,0,0,.1)}
-.dd-item{padding:5px 8px;border-radius:3px;font-size:10px;font-weight:500;cursor:pointer}
-.dd-item:hover{background:var(--sf2)}
-
-/* dynamic spouse family section */
-.sp-fam-sec{border-top:1px solid var(--bd);margin-top:2px;padding-top:4px}
+.tbar{position:fixed;top:10px;right:14px;z-index:50;display:flex;gap:5px}
+.tb{padding:7px 14px;border:1px solid var(--bd);border-radius:5px;background:#fff;color:var(--tx);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:4px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.tb:hover{background:var(--sf2)}.tb:active{transform:scale(.97)}
+.zc{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;z-index:50;border-radius:5px;overflow:hidden;border:1px solid var(--bd)}
+.zb{width:32px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:16px;cursor:pointer;font-family:var(--ft)}
+.zb:last-child{border-bottom:none}.zb:hover{background:var(--sf2)}
+.zlb{font-size:9px;text-align:center;padding:3px 0;color:var(--txd);background:#fff;border-bottom:1px solid var(--bd)}
+.ctx{position:fixed;z-index:200;background:#fff;border:1px solid var(--bd);border-radius:5px;padding:3px;min-width:130px;box-shadow:0 4px 16px rgba(0,0,0,.1);display:none}.ctx.show{display:block}
+.ci-i{padding:6px 10px;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;transition:background .08s}.ci-i:hover{background:var(--sf2)}.ci-i.danger{color:var(--dg)}
+.csep{height:1px;background:var(--bd);margin:3px 6px}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--tx);color:#fff;border-radius:5px;padding:7px 18px;font-size:12px;z-index:300;transition:transform .25s ease;pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0)}
+.dd-ov{position:fixed;inset:0;z-index:150;display:none}.dd-ov.show{display:block}
+.dd-mn{position:fixed;z-index:151;background:#fff;border:1px solid var(--bd);border-radius:5px;padding:3px;min-width:130px;box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.dd-it{padding:7px 10px;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer}.dd-it:hover{background:var(--sf2)}
 </style>
 </head>
 <body>
 
-<div class="lpanel">
-  <div class="lp-head">
-    <h1>가계도 그리기(문의: 32robin@naver.com)</h1>
-    <div class="undo-bar">
-      <button class="undo-btn" id="undoBtn" title="되돌리기" onclick="undo()" disabled>↶</button>
-      <button class="undo-btn" id="redoBtn" title="되돌리기 취소" onclick="redo()" disabled>↷</button>
-    </div>
+<div class="lp">
+  <div class="lp-hd"><h1>가계도 그리기</h1><div class="contact">문의: 32robin@naver.com</div>
+    <div class="undo-bar"><button class="ub" id="undoBtn" onclick="undo()" disabled>↶</button><button class="ub" id="redoBtn" onclick="redo()" disabled>↷</button></div>
   </div>
-  <div class="lp-scroll" id="lpScroll">
+  <div class="lp-sc">
+    <div class="sec s-me"><h3>나 (본인)</h3><div class="me-box"><div class="ml">본인 성별</div><div class="gr"><button class="gb sel" id="gM" onclick="setMyGender('male')">남성 ■</button><button class="gb" id="gF" onclick="setMyGender('female')">여성 ●</button></div></div></div>
 
-    <div class="sec"><h3>나 (본인)</h3>
-      <div class="me-box"><div class="ml">본인 성별</div>
-        <div class="gr"><button class="gb sel" id="gM" onclick="setMyGender('male')">남성</button><button class="gb" id="gF" onclick="setMyGender('female')">여성</button></div>
+    <div class="sec s-sel"><h3>클릭하여 구성원 선택</h3>
+      <div class="sel-info" id="selInfo">구성원을 클릭하여 선택하세요</div>
+      <div class="br" style="margin-top:6px">
+        <button class="b" onclick="addParentsToSel()"><span class="ic nb">+</span>부모님 추가</button>
+        <button class="b" onclick="addSpouseToSel('male')"><span class="ic"></span>남성 배우자 추가</button>
+        <button class="b" onclick="addSpouseToSel('female')"><span class="ic ci"></span>여성 배우자 추가</button>
       </div>
     </div>
 
-    <div class="sec"><h3>가족 추가</h3><div class="br">
-      <button class="b" onclick="addParents('me')"><span class="i nb">+</span>부모님 추가</button>
-      <button class="b" onclick="addGP('me','paternal')"><span class="i nb">+</span>친조부모님 추가</button>
-      <button class="b" onclick="addGP('me','maternal')"><span class="i nb">+</span>외조부모님 추가</button>
+    <div class="sec s-couple"><h3>선택된 부부</h3>
+      <div class="sel-info" id="coupleInfo">구성원을 <b>더블클릭</b>하여 부부를 선택하세요</div>
+      <div class="br" style="margin-top:6px">
+        <button class="b" onclick="addChildToCouple('male')"><span class="ic"></span>아들 추가</button>
+        <button class="b" onclick="addChildToCouple('female')"><span class="ic ci"></span>딸 추가</button>
+        <button class="b" onclick="showTwinDD(event)"><span class="ic nb">⋔</span>쌍둥이 추가 ▾</button>
+      </div>
+    </div>
+
+    <div class="sec s-sib"><h3>형제자매 추가</h3>
+      <div class="br">
+        <button class="b" onclick="addSibToSel('male','형/오빠')"><span class="ic"></span>형/오빠 추가</button>
+        <button class="b" onclick="addSibToSel('female','언니/누나')"><span class="ic ci"></span>언니/누나 추가</button>
+        <button class="b" onclick="addSibToSel('male','남동생')"><span class="ic"></span>남동생 추가</button>
+        <button class="b" onclick="addSibToSel('female','여동생')"><span class="ic ci"></span>여동생 추가</button>
+      </div>
+    </div>
+
+    <div class="sec s-add"><h3>구성원 직접 추가</h3><div class="br">
+      <button class="b" onclick="addFree('male')"><span class="ic"></span>남성</button>
+      <button class="b" onclick="addFree('female')"><span class="ic ci"></span>여성</button>
+      <button class="b" onclick="showDecDD(event)"><span class="ic xi"></span>고인 ▾</button>
     </div></div>
 
-    <div class="sec"><h3>배우자/연인</h3><div class="br">
-      <button class="b" onclick="addSpouse('male')"><span class="i"></span>남성 배우자/연인</button>
-      <button class="b" onclick="addSpouse('female')"><span class="i ci"></span>여성 배우자/연인</button>
+    <div class="sec s-tool"><h3>도구</h3><div class="br">
+      <button class="b" id="btnConn" onclick="tg('connect')"><span class="ic nb">↕</span>부모-자녀 연결</button>
+      <button class="b" id="btnSpo" onclick="tg('spouse')"><span class="ic nb">─</span>배우자 연결</button>
+      <button class="b" id="btnGT" onclick="tg('genderToggle')"><span class="ic nb">⇄</span>성별 전환</button>
+      <button class="b" id="btnDT" onclick="tg('decToggle')"><span class="ic nb">✝</span>고인 표시 전환</button>
+      <button class="b" id="btnDel" onclick="tg('delete')"><span class="ic nb">✕</span>삭제 모드</button>
     </div></div>
 
-    <div id="spouseFamSec"></div>
-
-    <div class="sec"><h3>형제자매</h3><div class="br">
-      <button class="b" onclick="addSib('male','형/오빠')"><span class="i"></span>형, 오빠</button>
-      <button class="b" onclick="addSib('female','언니/누나')"><span class="i ci"></span>언니, 누나</button>
-      <button class="b" onclick="addSib('male','남동생')"><span class="i"></span>남동생</button>
-      <button class="b" onclick="addSib('female','여동생')"><span class="i ci"></span>여동생</button>
+    <div class="sec s-line"><h3>관계선 변경</h3><div class="br">
+      <button class="b" id="lnN" onclick="tg('lnNorm')"><span class="ic nb">―</span>일반</button>
+      <button class="b" id="lnC" onclick="tg('lnClose')"><span class="ic nb">═</span>친밀</button>
+      <button class="b" id="lnD" onclick="tg('lnDist')"><span class="ic nb">┄</span>소원</button>
+      <button class="b" id="lnX" onclick="tg('lnCut')"><span class="ic nb">╫</span>단절</button>
+      <button class="b" id="lnF" onclick="tg('lnConf')"><span class="ic zzig"><svg viewBox="0 0 20 12"><polyline points="0,6 4,2 8,10 12,2 16,10 20,6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>갈등</button>
+      <button class="b" id="lnDv" onclick="tg('lnDiv')"><span class="ic nb">⫽</span>이혼</button>
+      <button class="b" id="lnSp" onclick="tg('lnSep')"><span class="ic nb">⁄</span>별거</button>
     </div></div>
 
-    <div class="sec"><h3>구성원 직접 추가</h3><div class="br">
-      <button class="b" onclick="addFree('male')"><span class="i"></span>남성</button>
-      <button class="b" onclick="addFree('female')"><span class="i ci"></span>여성</button>
-      <button class="b" onclick="showDD(event)"><span class="i xi"></span>고인 ▾</button>
-      <button class="b" onclick="addFree('unknown')"><span class="i di"></span>미상</button>
-    </div></div>
-
-    <div class="sec"><h3>도구</h3><div class="br">
-      <button class="b" id="btnConn" onclick="tgMode('connect')"><span class="i nb">↕</span>부모-자녀 연결</button>
-      <button class="b" id="btnSp" onclick="tgMode('spouse')"><span class="i nb">─</span>배우자 연결</button>
-      <button class="b" id="btnTwin" onclick="tgMode('twin')"><span class="i nb">⋔</span>쌍둥이 표시</button>
-      <button class="b" id="btnDec" onclick="tgMode('markDec')"><span class="i nb">✝</span>고인 표시 전환</button>
-      <button class="b" id="btnDel" onclick="tgMode('delete')"><span class="i nb">✕</span>삭제 모드</button>
-    </div></div>
-
-    <div class="sec"><h3>관계선 변경</h3><div class="br">
-      <button class="b" id="btnLN" onclick="tgMode('lnNorm')"><span class="i nb">―</span>일반</button>
-      <button class="b" id="btnLC" onclick="tgMode('lnClose')"><span class="i nb">═</span>친밀</button>
-      <button class="b" id="btnLD" onclick="tgMode('lnDist')"><span class="i nb">┄</span>소원</button>
-      <button class="b" id="btnLX" onclick="tgMode('lnCut')"><span class="i nb">╫</span>단절</button>
-      <button class="b" id="btnLF" onclick="tgMode('lnConf')"><span class="i nb">⚡</span>갈등</button>
-      <button class="b" id="btnLDv" onclick="tgMode('lnDiv')"><span class="i nb">⫽</span>이혼</button>
-      <button class="b" id="btnLSp" onclick="tgMode('lnSep')"><span class="i nb">⁄</span>별거</button>
-    </div></div>
-
-    <div class="sec"><div class="br">
-      <button class="b" onclick="centerAll()"><span class="i nb">⊞</span>가계도 중앙 정렬</button>
-      <button class="b" onclick="clearAll()"><span class="i nb">↺</span>전체 초기화</button>
+    <div class="sec s-tool"><div class="br">
+      <button class="b" onclick="centerAll()"><span class="ic nb">⊞</span>중앙 정렬</button>
+      <button class="b" onclick="clearAll()"><span class="ic nb">↺</span>전체 초기화</button>
     </div></div>
   </div>
-  <div class="lp-foot"><kbd>Ctrl+Z</kbd> 되돌리기 <kbd>Ctrl+Shift+Z</kbd> 취소<br><kbd>Esc</kbd> 모드 해제</div>
+  <div class="lp-ft"><kbd>Ctrl+Z</kbd> 되돌리기 &nbsp;<kbd>Ctrl+Shift+Z</kbd> 취소</div>
 </div>
 
-<div class="mpanel">
-  <div class="mp-head">구성원 정보</div>
-  <div class="mp-scroll" id="mpScroll"></div>
-</div>
+<div class="mp"><div class="mp-hd">구성원 정보</div><div class="mp-sc" id="mpSc"></div></div>
 
 <div class="tbar">
   <button class="tb" onclick="centerAll()">⊞ 중앙 정렬</button>
   <button class="tb" onclick="downloadJPG()">⬇ JPG 다운로드</button>
 </div>
 
-<div class="carea" id="carea">
-  <div class="a4" id="a4">
-    <div class="cinr" id="cinr">
-      <svg class="lsvg" id="lsvg"></svg>
-    </div>
-  </div>
+<div class="ca" id="ca">
+  <div class="a4" id="a4"><div class="cinr" id="cinr"><svg class="lsvg" id="lsvg"></svg></div></div>
 </div>
 
-<div class="zc"><button class="zb" onclick="zIn()">+</button><div class="zl" id="zl">100%</div><button class="zb" onclick="zOut()">−</button></div>
+<div class="zc"><button class="zb" onclick="zI()">+</button><div class="zlb" id="zl">100%</div><button class="zb" onclick="zO()">−</button></div>
 
 <div class="ctx" id="ctx">
-  <div class="ci-i" onclick="ctxA('rename')">이름 수정</div>
-  <div class="ci-i" onclick="ctxA('dup')">복제</div><div class="cs"></div>
-  <div class="ci-i" onclick="ctxA('toM')">남성 변경</div>
-  <div class="ci-i" onclick="ctxA('toF')">여성 변경</div>
-  <div class="ci-i" onclick="ctxA('toDM')">고인(남) 변경</div>
-  <div class="ci-i" onclick="ctxA('toDF')">고인(여) 변경</div>
-  <div class="cs"></div><div class="ci-i danger" onclick="ctxA('del')">삭제</div>
+  <div class="ci-i" onclick="ctxA('rename')">이름 수정</div><div class="csep"></div>
+  <div class="ci-i" onclick="ctxA('toM')">남성 변경</div><div class="ci-i" onclick="ctxA('toF')">여성 변경</div>
+  <div class="ci-i" onclick="ctxA('toDM')">고인(남) 변경</div><div class="ci-i" onclick="ctxA('toDF')">고인(여) 변경</div>
+  <div class="csep"></div><div class="ci-i danger" onclick="ctxA('del')">삭제</div>
 </div>
 
-<div class="dd-overlay" id="ddOv" onclick="hideDD()"></div>
-<div class="dd-menu" id="ddMn" style="display:none">
-  <div class="dd-item" onclick="addFree('deceased-male');hideDD()">고인 (남성)</div>
-  <div class="dd-item" onclick="addFree('deceased-female');hideDD()">고인 (여성)</div>
+<div class="dd-ov" id="ddOv" onclick="hideAllDD()"></div>
+<div class="dd-mn" id="ddDec" style="display:none">
+  <div class="dd-it" onclick="addFree('deceased-male');hideAllDD()">고인 (남성)</div>
+  <div class="dd-it" onclick="addFree('deceased-female');hideAllDD()">고인 (여성)</div>
 </div>
-<div class="toast" id="toast"></div>
+<div class="dd-mn" id="ddTwin" style="display:none">
+  <div class="dd-it" onclick="addTwins(2)">2명 (쌍둥이)</div><div class="dd-it" onclick="addTwins(3)">3명</div>
+  <div class="dd-it" onclick="addTwins(4)">4명</div><div class="dd-it" onclick="addTwins(5)">5명</div>
+  <div class="dd-it" onclick="addTwins(6)">6명</div><div class="dd-it" onclick="addTwins(7)">7명</div>
+</div>
+<div class="toast" id="toastEl"></div>
 
 <script>
-const NW=44,NH=44,SG=70,GG=120,SBG=68;
-const PW=1122,PH=793,PPX=40,PPY=30;
-const IW=PW-PPX*2,IH=PH-PPY*2;
+const NW=44,NH=44,SG=74,GG=130,SBG=72,MG=28;
+const PW=1122,PH=793,PPX=40,PPY=30,IW=PW-PPX*2,IH=PH-PPY*2;
+const SNAP_DIST=18; // magnet snap distance
 
-const carea=document.getElementById('carea'),cinr=document.getElementById('cinr'),lsvg=document.getElementById('lsvg'),ctxEl=document.getElementById('ctx'),a4=document.getElementById('a4');
+const ca=document.getElementById('ca'),cinr=document.getElementById('cinr'),
+      lsvg=document.getElementById('lsvg'),ctxEl=document.getElementById('ctx'),a4=document.getElementById('a4');
 
-let N=[],C=[],nid=1,scale=1,mode='select';
-let connFrom=null,tmpLine=null,selNode=null,ctxTgt=null;
-let drag=null,dox=0,doy=0;
-let undoS=[],redoS=[];
-const MU=80;
-
+let nodes=[],conns=[],twinGroups=[],nid=1,scale=1,mode='select';
+let connFrom=null,tmpLine=null,selNode=null,selCouple=null,ctxTgt=null;
+let drag=null,dox=0,doy=0,dragIsFree=false;
 let meNode=null,meGender='male';
-// Family refs: me side
-let fa=null,mo=null,pgf=null,pgm=null,mgf=null,mgm=null;
-// Spouse refs
-let mySpouse=null;
-let sfa=null,smo=null,spgf=null,spgm=null,smgf=null,smgm=null;
+let undoS=[],redoS=[];const MU=80;
 
-// Twin pairs: [[childId1, childId2], ...]
-let twins=[];
+function gn(id){return id!=null?nodes.find(n=>n.id===id):null}
+function isFem(t){return t==='female'||t==='deceased-female'}
+function baseG(t){return isFem(t)?'female':'male'}
+function getSpouse(nid){const c=conns.find(c=>c.type==='spouse'&&(c.from===nid||c.to===nid));return c?gn(c.from===nid?c.to:c.from):null}
+function getSpouseConn(nid){return conns.find(c=>c.type==='spouse'&&(c.from===nid||c.to===nid))}
+function getParents(nid){return conns.filter(c=>c.type==='parent'&&c.to===nid).map(c=>gn(c.from)).filter(Boolean)}
+function getChildren(nid){return conns.filter(c=>c.type==='parent'&&c.from===nid).map(c=>gn(c.to)).filter(Boolean)}
+function childrenOfCouple(a,b){const ca2=conns.filter(c=>c.type==='parent'&&c.from===a).map(c=>c.to);const cb=conns.filter(c=>c.type==='parent'&&c.from===b).map(c=>c.to);return ca2.filter(id=>cb.includes(id))}
+function hasParents(nid){return conns.some(c=>c.type==='parent'&&c.to===nid)}
+function connExists(a,b,type){return conns.some(c=>c.type===type&&((c.from===a&&c.to===b)||(c.from===b&&c.to===a)))}
+function isConnected(nid){return conns.some(c=>c.from===nid||c.to===nid)}
 
-function snap(){
-  const s={N:N.map(n=>({id:n.id,type:n.type,name:n.name,age:n.age||'',x:n.x,y:n.y,isMe:n.isMe})),C:C.map(c=>({...c})),nid,twins:twins.map(t=>[...t]),
-    refs:{fa:fa?.id,mo:mo?.id,pgf:pgf?.id,pgm:pgm?.id,mgf:mgf?.id,mgm:mgm?.id,
-      sp:mySpouse?.id,sfa:sfa?.id,smo:smo?.id,spgf:spgf?.id,spgm:spgm?.id,smgf:smgf?.id,smgm:smgm?.id}};
-  undoS.push(JSON.stringify(s));if(undoS.length>MU)undoS.shift();redoS=[];updUB();
-}
+/* ── UNDO/REDO ── */
+function getSnap(){return JSON.stringify({nodes:nodes.map(n=>({id:n.id,type:n.type,name:n.name,age:n.age||'',gen:n.gen,isMe:n.isMe,x:n.x,y:n.y,free:!!n.free})),conns:conns.map(c=>({...c})),twinGroups:twinGroups.map(t=>[...t]),nid})}
+function snap(){undoS.push(getSnap());if(undoS.length>MU)undoS.shift();redoS=[];updUB()}
+function restoreSnap(s){const d=JSON.parse(s);nodes.forEach(n=>n.el&&n.el.remove());nodes=[];conns=d.conns;twinGroups=d.twinGroups||[];nid=d.nid;d.nodes.forEach(nd=>{const n=mkNode(nd.type,nd.x,nd.y,nd.name,nd.isMe,nd.gen,nd.free);n.id=nd.id;n.age=nd.age||'';n.el.dataset.id=nd.id;updAge(n);nodes.push(n)});meNode=nodes.find(n=>n.isMe)||null;selNode=null;selCouple=null;renderAll()}
+function undo(){if(!undoS.length)return;redoS.push(getSnap());restoreSnap(undoS.pop());toast('되돌리기')}
+function redo(){if(!redoS.length)return;undoS.push(getSnap());restoreSnap(redoS.pop());toast('되돌리기 취소')}
+function updUB(){document.getElementById('undoBtn').disabled=!undoS.length;document.getElementById('redoBtn').disabled=!redoS.length}
 
-function restoreState(s){
-  N.forEach(n=>n.el&&n.el.remove());N=[];C=s.C;nid=s.nid;twins=s.twins||[];
-  s.N.forEach(nd=>{const n=mkN(nd.type,nd.x,nd.y,nd.name,nd.isMe);n.id=nd.id;n.age=nd.age||'';n.el.dataset.id=nd.id;updAge(n);N.push(n);});
-  meNode=N.find(n=>n.isMe)||null;
-  const r=s.refs;
-  fa=gn(r.fa);mo=gn(r.mo);pgf=gn(r.pgf);pgm=gn(r.pgm);mgf=gn(r.mgf);mgm=gn(r.mgm);
-  mySpouse=gn(r.sp);sfa=gn(r.sfa);smo=gn(r.smo);spgf=gn(r.spgf);spgm=gn(r.spgm);smgf=gn(r.smgf);smgm=gn(r.smgm);
-  renderLines();renderCards();renderSpFam();updUB();
-}
-function gn(id){return id!=null?N.find(n=>n.id===id):null}
-
-function undo(){if(!undoS.length)return;const cur=getState();redoS.push(JSON.stringify(cur));restoreState(JSON.parse(undoS.pop()));toast('되돌리기');}
-function redo(){if(!redoS.length)return;const cur=getState();undoS.push(JSON.stringify(cur));restoreState(JSON.parse(redoS.pop()));toast('되돌리기 취소');}
-function getState(){return{N:N.map(n=>({id:n.id,type:n.type,name:n.name,age:n.age||'',x:n.x,y:n.y,isMe:n.isMe})),C:C.map(c=>({...c})),nid,twins:twins.map(t=>[...t]),refs:{fa:fa?.id,mo:mo?.id,pgf:pgf?.id,pgm:pgm?.id,mgf:mgf?.id,mgm:mgm?.id,sp:mySpouse?.id,sfa:sfa?.id,smo:smo?.id,spgf:spgf?.id,spgm:spgm?.id,smgf:smgf?.id,smgm:smgm?.id}};}
-function updUB(){document.getElementById('undoBtn').disabled=!undoS.length;document.getElementById('redoBtn').disabled=!redoS.length;}
-
-function uz(){a4.style.transform=`scale(${scale})`;document.getElementById('zl').textContent=Math.round(scale*100)+'%';}
-function zIn(){scale=Math.min(1.5,scale+.1);uz();}
-function zOut(){scale=Math.max(.25,scale-.1);uz();}
-carea.addEventListener('wheel',e=>{e.preventDefault();scale=Math.max(.25,Math.min(1.5,scale+(e.deltaY>0?-.06:.06)));uz();},{passive:false});
+function uz(){a4.style.transform=`scale(${scale})`;document.getElementById('zl').textContent=Math.round(scale*100)+'%'}
+function zI(){scale=Math.min(1.5,scale+.1);uz()}
+function zO(){scale=Math.max(.2,scale-.1);uz()}
+ca.addEventListener('wheel',e=>{e.preventDefault();scale=Math.max(.2,Math.min(1.5,scale+(e.deltaY>0?-.06:.06)));uz()},{passive:false});
 
 /* ── RENDER LINES ── */
 function renderLines(){
   lsvg.innerHTML='';
-  const drawn=new Set();
-  // Find twin pairs for rendering
-  const twinSets=twins.map(t=>new Set(t));
+  const drawnC=new Set();
+  const allTwinIds=new Set();twinGroups.forEach(tg=>tg.forEach(id=>allTwinIds.add(id)));
 
-  C.filter(c=>c.type==='spouse').forEach(conn=>{
+  conns.filter(c=>c.type==='spouse').forEach(conn=>{
     const n1=gn(conn.from),n2=gn(conn.to);if(!n1||!n2)return;
     const lt=n1.x<n2.x?n1:n2,rt=n1.x<n2.x?n2:n1;
-    const p1={x:lt.x+NW,y:lt.y+NH/2},p2={x:rt.x,y:rt.y+NH/2};
-    drawRL(p1.x,p1.y,p2.x,p2.y,conn);
+    const y=Math.min(lt.y,rt.y)+NH/2;
+    drawRL(lt.x+NW,y,rt.x,y,conn);
 
-    const mx=(p1.x+p2.x)/2,my=p1.y;
-    const kids=childrenOf(conn.from,conn.to);
-    if(!kids.length)return;
-    const cns=kids.map(id=>N.find(n=>n.id===id)).filter(Boolean);
-    if(!cns.length)return;
-    const dy=my+(GG-NH)/2+NH/2;
-    addL(mx,my,mx,dy,'cl');
-    const cxs=cns.map(cn=>cn.x+NW/2).sort((a,b)=>a-b);
-    addL(Math.min(mx,cxs[0]),dy,Math.max(mx,cxs[cxs.length-1]),dy,'cl');
-    cns.forEach(cn=>{
-      // Check if this child is part of a twin pair
-      let isTwin=false;
-      for(const ts of twinSets){
-        if(ts.has(cn.id)){isTwin=true;break;}
-      }
-      addL(cn.x+NW/2,dy,cn.x+NW/2,cn.y,'cl');
-      drawn.add(cn.id);
+    const kids=childrenOfCouple(conn.from,conn.to);if(!kids.length)return;
+    const cns=kids.map(id=>gn(id)).filter(Boolean);if(!cns.length)return;
+    const mx=(lt.x+NW+rt.x)/2,my=y,dropY=my+GG/2;
+
+    const kidSet=new Set(kids);
+    const tgHere=twinGroups.filter(tg=>tg.some(id=>kidSet.has(id)));
+    const usedTwin=new Set();tgHere.forEach(tg=>tg.forEach(id=>usedTwin.add(id)));
+    const nonTwin=cns.filter(cn=>!usedTwin.has(cn.id));
+    const allCx=[...nonTwin.map(cn=>cn.x+NW/2)];
+    tgHere.forEach(tg=>{tg.forEach(id=>{const n=gn(id);if(n)allCx.push(n.x+NW/2)})});
+    if(!allCx.length)return;
+    allCx.sort((a,b)=>a-b);
+
+    addLine(mx,my,mx,dropY,'cl');
+    const bL=Math.min(mx,...allCx),bR=Math.max(mx,...allCx);
+    if(bL<bR)addLine(bL,dropY,bR,dropY,'cl');
+
+    nonTwin.forEach(cn=>{addLine(cn.x+NW/2,dropY,cn.x+NW/2,cn.y,'cl');drawnC.add(cn.id)});
+
+    tgHere.forEach(tg=>{
+      const tns=tg.map(id=>gn(id)).filter(Boolean);if(tns.length<2)return;
+      const txs=tns.map(n=>n.x+NW/2).sort((a,b)=>a-b);
+      const midTx=(txs[0]+txs[txs.length-1])/2;
+      const convY=dropY+(tns[0].y-dropY)*0.4;
+      addLine(midTx,dropY,midTx,convY,'cl');
+      tns.forEach(tn=>{addLine(midTx,convY,tn.x+NW/2,tn.y,'cl');drawnC.add(tn.id)});
     });
-
-    // Draw twin indicators (diagonal lines meeting at a point)
-    for(const tp of twins){
-      const t1=N.find(n=>n.id===tp[0]),t2=N.find(n=>n.id===tp[1]);
-      if(!t1||!t2)continue;
-      if(!kids.includes(tp[0])||!kids.includes(tp[1]))continue;
-      // Draw a small triangle/connector between the two vertical lines
-      const tx1=t1.x+NW/2, tx2=t2.x+NW/2;
-      const tmid=(tx1+tx2)/2;
-      const tTop=dy, tMid=dy+(t1.y-dy)*0.4;
-      // Two diagonal lines from drop bar converging
-      addL(tx1,tTop,tmid,tMid,'cl');
-      addL(tx2,tTop,tmid,tMid,'cl');
-    }
+    kids.forEach(id=>drawnC.add(id));
   });
-  C.filter(c=>c.type==='parent').forEach(conn=>{
-    if(drawn.has(conn.to))return;
+
+  conns.filter(c=>c.type==='parent').forEach(conn=>{
+    if(drawnC.has(conn.to))return;
     const p=gn(conn.from),ch=gn(conn.to);if(!p||!ch)return;
     const p1={x:p.x+NW/2,y:p.y+NH},p2={x:ch.x+NW/2,y:ch.y};
     const my=(p1.y+p2.y)/2;
-    addL(p1.x,p1.y,p1.x,my,'cl',conn);addL(p1.x,my,p2.x,my,'cl',conn);addL(p2.x,my,p2.x,p2.y,'cl',conn);
+    addLine(p1.x,p1.y,p1.x,my,'cl',conn);addLine(p1.x,my,p2.x,my,'cl',conn);addLine(p2.x,my,p2.x,p2.y,'cl',conn);
   });
 }
 
 function drawRL(x1,y1,x2,y2,conn){
-  const rs=conn.relStyle||'normal';
-  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-  const ux=dx/len,uy=dy/len,px=-uy,py=ux;
-
-  if(rs==='close'){
-    addL(x1+px*3,y1+py*3,x2+px*3,y2+py*3,'cl',conn);
-    addL(x1-px*3,y1-py*3,x2-px*3,y2-py*3,'cl',conn);
-  } else if(rs==='distant'){
-    // Dashed line
-    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
-    l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
-    l.setAttribute('class','cl');l.setAttribute('stroke-dasharray','6 4');l.style.pointerEvents='stroke';
-    l.addEventListener('click',()=>onLineClick(conn));lsvg.appendChild(l);
-  } else if(rs==='cutoff'){
-    // ──┤ ├── style: line with two perpendicular bars in middle, gap between
-    const mx=(x1+x2)/2,my=(y1+y2)/2;
-    const gap=8,bar=7;
-    addL(x1,y1,mx-ux*gap,my-uy*gap,'cl',conn);
-    addL(mx+ux*gap,my+uy*gap,x2,y2,'cl',conn);
-    // Two perpendicular bars
-    addL(mx-ux*gap+px*bar,my-uy*gap+py*bar,mx-ux*gap-px*bar,my-uy*gap-py*bar,'cl');
-    addL(mx+ux*gap+px*bar,my+uy*gap+py*bar,mx+ux*gap-px*bar,my+uy*gap-py*bar,'cl');
-  } else if(rs==='conflict'){
-    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    const segs=6,amp=5;let d=`M${x1},${y1}`;
-    const segL=len/(segs+2);
-    let cx2=x1+ux*segL,cy2=y1+uy*segL;d+=` L${cx2},${cy2}`;
-    for(let i=0;i<segs;i++){const dir=(i%2===0)?1:-1;cx2+=ux*segL;cy2+=uy*segL;d+=` L${cx2+px*amp*dir},${cy2+py*amp*dir}`;}
-    d+=` L${x2},${y2}`;path.setAttribute('d',d);path.setAttribute('class','clp');path.style.pointerEvents='stroke';
-    path.addEventListener('click',()=>onLineClick(conn));lsvg.appendChild(path);
-  } else if(rs==='divorce'){
-    // Two slashes through the line
-    const mx=(x1+x2)/2,my=(y1+y2)/2;
-    addL(x1,y1,x2,y2,'cl',conn);
-    const sl=6;
-    addL(mx-ux*3+px*sl-ux*sl,my-uy*3+py*sl-uy*sl,mx-ux*3-px*sl+ux*sl,my-uy*3-py*sl+uy*sl,'cl');
-    addL(mx+ux*3+px*sl-ux*sl,my+uy*3+py*sl-uy*sl,mx+ux*3-px*sl+ux*sl,my+uy*3-py*sl+uy*sl,'cl');
-  } else if(rs==='separation'){
-    // One slash through the line
-    addL(x1,y1,x2,y2,'cl',conn);
-    const mx=(x1+x2)/2,my=(y1+y2)/2,sl=6;
-    addL(mx+px*sl-ux*sl,my+py*sl-uy*sl,mx-px*sl+ux*sl,my-py*sl+uy*sl,'cl');
-  } else {
-    addL(x1,y1,x2,y2,'cl',conn);
-  }
+  const rs=conn.relStyle||'normal';const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;const ux=dx/len,uy=dy/len,px=-uy,py=ux;
+  if(rs==='close'){addLine(x1+px*3,y1+py*3,x2+px*3,y2+py*3,'cl',conn);addLine(x1-px*3,y1-py*3,x2-px*3,y2-py*3,'cl',conn)}
+  else if(rs==='distant'){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class','cl');l.setAttribute('stroke-dasharray','6 4');l.style.pointerEvents='stroke';l.addEventListener('click',()=>onLnClick(conn));lsvg.appendChild(l)}
+  else if(rs==='cutoff'){const mx=(x1+x2)/2,my=(y1+y2)/2,g=8,b=7;addLine(x1,y1,mx-ux*g,my-uy*g,'cl',conn);addLine(mx+ux*g,my+uy*g,x2,y2,'cl',conn);addLine(mx-ux*g+px*b,my-uy*g+py*b,mx-ux*g-px*b,my-uy*g-py*b,'cl');addLine(mx+ux*g+px*b,my+uy*g+py*b,mx+ux*g-px*b,my+uy*g-py*b,'cl')}
+  else if(rs==='conflict'){const p=document.createElementNS('http://www.w3.org/2000/svg','path');const segs=6,amp=5;let d=`M${x1},${y1}`;const sl=len/(segs+2);let cx=x1+ux*sl,cy=y1+uy*sl;d+=` L${cx},${cy}`;for(let i=0;i<segs;i++){cx+=ux*sl;cy+=uy*sl;d+=` L${cx+px*amp*((i%2===0)?1:-1)},${cy+py*amp*((i%2===0)?1:-1)}`}d+=` L${x2},${y2}`;p.setAttribute('d',d);p.setAttribute('class','clp');p.style.pointerEvents='stroke';p.addEventListener('click',()=>onLnClick(conn));lsvg.appendChild(p)}
+  else if(rs==='divorce'){addLine(x1,y1,x2,y2,'cl',conn);const mx=(x1+x2)/2,my=(y1+y2)/2,s=7;addLine(mx-3+px*s,my+py*s,mx-3-px*s,my-py*s,'cl');addLine(mx+3+px*s,my+py*s,mx+3-px*s,my-py*s,'cl')}
+  else if(rs==='separation'){addLine(x1,y1,x2,y2,'cl',conn);const mx=(x1+x2)/2,my=(y1+y2)/2,s=7;addLine(mx+px*s,my+py*s,mx-px*s,my-py*s,'cl')}
+  else addLine(x1,y1,x2,y2,'cl',conn);
 }
-
-function onLineClick(conn){
-  if(mode==='delete'){snap();rmC(conn);}
-  if(mode.startsWith('ln')){snap();setLS(conn);}
+function onLnClick(conn){
+  if(mode==='delete'){snap();rmConn(conn)}
+  else if(mode.startsWith('ln')){snap();const map={lnNorm:'normal',lnClose:'close',lnDist:'distant',lnCut:'cutoff',lnConf:'conflict',lnDiv:'divorce',lnSep:'separation'};conn.relStyle=map[mode]||'normal';renderLines();toast({normal:'일반',close:'친밀',distant:'소원',cutoff:'단절',conflict:'갈등',divorce:'이혼',separation:'별거'}[conn.relStyle]+' 관계')}
+  else if(conn.type==='spouse')selectCouple(conn.from,conn.to);
 }
-
-function addL(x1,y1,x2,y2,cls,conn){
-  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
-  l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
-  l.setAttribute('class',cls);l.style.pointerEvents='stroke';
-  if(conn){l.addEventListener('click',()=>onLineClick(conn));l.addEventListener('contextmenu',e=>{e.preventDefault();snap();rmC(conn);});}
-  lsvg.appendChild(l);return l;
-}
-
-function setLS(conn){
-  const map={lnNorm:'normal',lnClose:'close',lnDist:'distant',lnCut:'cutoff',lnConf:'conflict',lnDiv:'divorce',lnSep:'separation'};
-  conn.relStyle=map[mode]||'normal';renderLines();
-  const lb={normal:'일반',close:'친밀',distant:'소원',cutoff:'단절',conflict:'갈등',divorce:'이혼',separation:'별거'};
-  toast(`${lb[conn.relStyle]} 관계로 변경`);
-}
-function rmC(c){const i=C.indexOf(c);if(i>=0){C.splice(i,1);renderLines();toast('연결 삭제');}}
-function childrenOf(a,b){const c1=C.filter(c=>c.type==='parent'&&c.from===a).map(c=>c.to);const c2=C.filter(c=>c.type==='parent'&&c.from===b).map(c=>c.to);return c1.filter(id=>c2.includes(id));}
+function addLine(x1,y1,x2,y2,cls,conn){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class',cls);l.style.pointerEvents='stroke';if(conn){l.addEventListener('click',()=>onLnClick(conn));l.addEventListener('contextmenu',e=>{e.preventDefault();snap();rmConn(conn)})}lsvg.appendChild(l)}
+function rmConn(c){const i=conns.indexOf(c);if(i>=0){conns.splice(i,1);renderAll();toast('연결 삭제')}}
 
 /* ── NODE ── */
-function mkN(type,x,y,name,isMe){
-  const node={id:nid++,type,name:name||'이름',age:'',x,y,el:null,isMe:!!isMe};
+function mkNode(type,x,y,name,isMe,gen,free){
+  const node={id:nid++,type,name:name||'이름',age:'',gen:gen??0,isMe:!!isMe,x,y,el:null,free:!!free};
   const el=document.createElement('div');
-  el.className=`node ${type}`+(isMe?' is-me':'');
+  el.className=`node ${type}`+(isMe?' is-me':'')+(free?' free-node':'');
   el.style.left=x+'px';el.style.top=y+'px';el.dataset.id=node.id;
   el.innerHTML=`<div class="ns"><span class="age-num"></span><div class="port top"></div><div class="port bottom"></div><div class="port left"></div><div class="port right"></div></div><div class="nn" contenteditable="true">${node.name}</div>`;
-  wireN(el,node);cinr.appendChild(el);node.el=el;return node;
+  wireNode(el,node);cinr.appendChild(el);node.el=el;return node;
 }
+function updAge(n){const el=n.el?.querySelector('.age-num');if(el)el.textContent=n.age||''}
+function setPos(n){if(n?.el){n.el.style.left=n.x+'px';n.el.style.top=n.y+'px'}}
 
-function updAge(n){
-  const el=n.el.querySelector('.age-num');
-  if(el)el.textContent=n.age||'';
-}
-
-function wireN(el,node){
+function wireNode(el,node){
   const nm=el.querySelector('.nn');
   nm.addEventListener('mousedown',e=>e.stopPropagation());
-  nm.addEventListener('focus',function(){if(this.textContent==='이름')this.textContent='';});
-  nm.addEventListener('blur',function(){node.name=this.textContent||'이름';if(!this.textContent)this.textContent='이름';renderCards();});
-  nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur();}});
-
+  nm.addEventListener('focus',function(){if(this.textContent==='이름')this.textContent=''});
+  nm.addEventListener('blur',function(){node.name=this.textContent||'이름';if(!this.textContent)this.textContent='이름';renderCards()});
+  nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur()}});
   el.querySelectorAll('.port').forEach(port=>{
-    port.addEventListener('mousedown',e=>{if(mode==='connect'||mode==='spouse'||mode==='twin'){e.stopPropagation();startConn(node);}});
-    port.addEventListener('mouseup',e=>{if(connFrom&&connFrom.node.id!==node.id){e.stopPropagation();endConn(node);}});
+    port.addEventListener('mousedown',e=>{if(mode==='connect'||mode==='spouse'){e.stopPropagation();startConn(node)}});
+    port.addEventListener('mouseup',e=>{if(connFrom&&connFrom.id!==node.id){e.stopPropagation();endConn(node)}});
   });
-
+  el.addEventListener('dblclick',e=>{e.stopPropagation();const sp=getSpouse(node.id);if(sp)selectCouple(node.id,sp.id)});
   el.addEventListener('mousedown',e=>{
     if(e.button===2)return;
-    if(mode==='delete'){if(!node.isMe){snap();delN(node.id);}else toast('"나"는 삭제 불가');return;}
-    if(mode==='markDec'){snap();togDec(node);return;}
+    if(mode==='delete'){if(!node.isMe){snap();delNode(node.id)}else toast('"나"는 삭제 불가');return}
+    if(mode==='genderToggle'){snap();togGender(node);return}
+    if(mode==='decToggle'){snap();togDec(node);return}
     if(mode.startsWith('ln'))return;
-    if(mode==='connect'||mode==='spouse'||mode==='twin'){e.stopPropagation();startConn(node);return;}
-    e.stopPropagation();drag=node;
+    if(mode==='connect'||mode==='spouse'){e.stopPropagation();startConn(node);return}
+    e.stopPropagation();drag=node;dragIsFree=!!node.free&&!isConnected(node.id);
     const rect=cinr.getBoundingClientRect();
-    dox=(e.clientX-rect.left)/scale-node.x;doy=(e.clientY-rect.top)/scale-node.y;
-    el.classList.add('dragging');selectN(node);
+    dox=(e.clientX-rect.left)/scale-node.x;
+    doy=(e.clientY-rect.top)/scale-node.y;
+    el.classList.add('dragging');selectNode(node);
   });
-  el.addEventListener('mouseup',e=>{if(connFrom&&connFrom.node.id!==node.id&&(mode==='connect'||mode==='spouse'||mode==='twin'))endConn(node);});
-  el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();ctxTgt=node;ctxEl.style.left=e.clientX+'px';ctxEl.style.top=e.clientY+'px';ctxEl.classList.add('show');});
+  el.addEventListener('mouseup',e=>{if(connFrom&&connFrom.id!==node.id&&(mode==='connect'||mode==='spouse'))endConn(node)});
+  el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();ctxTgt=node;ctxEl.style.left=e.clientX+'px';ctxEl.style.top=e.clientY+'px';ctxEl.classList.add('show')});
 }
 
-function togDec(node){
-  if(node.type==='deceased-male')node.type='male';
-  else if(node.type==='deceased-female')node.type='female';
-  else if(node.type==='male')node.type='deceased-male';
-  else if(node.type==='female')node.type='deceased-female';
-  else return;
-  node.el.className=`node ${node.type}`+(node.isMe?' is-me':'')+(node.el.classList.contains('selected')?' selected':'');
-  renderLines();renderCards();toast('고인 표시 변경');
+function togGender(n){if(n.type==='male')n.type='female';else if(n.type==='female')n.type='male';else if(n.type==='deceased-male')n.type='deceased-female';else if(n.type==='deceased-female')n.type='deceased-male';else return;n.el.className=`node ${n.type}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');if(n.isMe){meGender=baseG(n.type);document.getElementById('gM').classList.toggle('sel',meGender==='male');document.getElementById('gF').classList.toggle('sel',meGender==='female')}renderAll();toast('성별 전환')}
+function togDec(n){if(n.type==='male')n.type='deceased-male';else if(n.type==='female')n.type='deceased-female';else if(n.type==='deceased-male')n.type='male';else if(n.type==='deceased-female')n.type='female';else return;n.el.className=`node ${n.type}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');renderAll();toast('고인 표시 변경')}
+
+function startConn(node){connFrom=node;tmpLine=document.createElementNS('http://www.w3.org/2000/svg','line');tmpLine.setAttribute('class','tl');const c={x:node.x+NW/2,y:node.y+NH/2};tmpLine.setAttribute('x1',c.x);tmpLine.setAttribute('y1',c.y);tmpLine.setAttribute('x2',c.x);tmpLine.setAttribute('y2',c.y);lsvg.appendChild(tmpLine)}
+function endConn(tgt){if(!connExists(connFrom.id,tgt.id,mode==='spouse'?'spouse':'parent')){snap();if(mode==='spouse'){tgt.gen=connFrom.gen;tgt.free=false;tgt.el.classList.remove('free-node');conns.push({from:connFrom.id,to:tgt.id,type:'spouse',relStyle:'normal'})}else{conns.push({from:connFrom.id,to:tgt.id,type:'parent',relStyle:'normal'});tgt.free=false;tgt.el.classList.remove('free-node')}renderAll();toast(mode==='spouse'?'배우자 연결':'부모-자녀 연결')}finConn()}
+function finConn(){connFrom=null;if(tmpLine){tmpLine.remove();tmpLine=null}}
+
+function selectNode(node){if(selNode)selNode.el.classList.remove('selected');selNode=node;node.el.classList.add('selected');updateSelInfo();renderCards()}
+function selectCouple(id1,id2){nodes.forEach(n=>n.el.classList.remove('couple-sel'));selCouple={a:id1,b:id2};const n1=gn(id1),n2=gn(id2);if(n1)n1.el.classList.add('couple-sel');if(n2)n2.el.classList.add('couple-sel');updateCoupleInfo()}
+function clearCoupleSelection(){nodes.forEach(n=>n.el.classList.remove('couple-sel'));selCouple=null;updateCoupleInfo()}
+function updateSelInfo(){const el=document.getElementById('selInfo');if(!selNode){el.innerHTML='구성원을 클릭하여 선택하세요';return}el.innerHTML=`<strong>${selNode.name}</strong> 선택됨`}
+function updateCoupleInfo(){const el=document.getElementById('coupleInfo');if(!selCouple){el.innerHTML='구성원을 <b>더블클릭</b>하여 부부를 선택하세요';return}const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b){selCouple=null;el.innerHTML='구성원을 <b>더블클릭</b>하여 부부를 선택하세요';return}el.innerHTML=`<strong>${a.name}</strong> + <strong>${b.name}</strong> <span class="ctag">부부 선택됨</span>`}
+
+/* ── ADD PARENTS ── */
+function addParentsToSel(){
+  if(!selNode){toast('구성원을 먼저 선택하세요');return}
+  if(hasParents(selNode.id)){toast('이미 부모님이 있습니다');return}
+  snap();
+  const pGen=selNode.gen+1;
+  let fn='아버지',mn='어머니';if(pGen>=2){fn='할아버지';mn='할머니'}if(pGen>=3){fn='증조할아버지';mn='증조할머니'}
+  const dad=mkNode('male',0,0,fn,false,pGen);const mom=mkNode('female',0,0,mn,false,pGen);
+  nodes.push(dad,mom);
+  conns.push({from:dad.id,to:mom.id,type:'spouse',relStyle:'normal'},{from:dad.id,to:selNode.id,type:'parent',relStyle:'normal'},{from:mom.id,to:selNode.id,type:'parent',relStyle:'normal'});
+  autoLayout();toast('부모님 추가');
 }
 
-function startConn(node){connFrom={node};tmpLine=document.createElementNS('http://www.w3.org/2000/svg','line');tmpLine.setAttribute('class','tl');const c={x:node.x+NW/2,y:node.y+NH/2};tmpLine.setAttribute('x1',c.x);tmpLine.setAttribute('y1',c.y);tmpLine.setAttribute('x2',c.x);tmpLine.setAttribute('y2',c.y);lsvg.appendChild(tmpLine);}
-function endConn(tgt){
-  if(mode==='twin'){
-    // Add twin pair
-    const id1=connFrom.node.id,id2=tgt.id;
-    const exists=twins.some(t=>(t.includes(id1)&&t.includes(id2)));
-    if(!exists){snap();twins.push([id1,id2]);renderLines();toast('쌍둥이 표시 완료');}
-    finConn();return;
-  }
-  const ex=C.find(c=>(c.from===connFrom.node.id&&c.to===tgt.id)||(c.from===tgt.id&&c.to===connFrom.node.id));
-  if(!ex){snap();C.push({from:connFrom.node.id,to:tgt.id,type:mode==='spouse'?'spouse':'parent',relStyle:'normal'});renderLines();toast(mode==='spouse'?'배우자 연결':'부모-자녀 연결');}
-  finConn();
-}
-function finConn(){connFrom=null;if(tmpLine){tmpLine.remove();tmpLine=null;}}
-
-function addFree(type){snap();const n=mkN(type,IW/2-NW/2+(Math.random()*50-25),IH/2-NH/2+(Math.random()*50-25),'이름',false);N.push(n);renderLines();renderCards();}
-function selectN(node){if(selNode)selNode.el.classList.remove('selected');selNode=node;node.el.classList.add('selected');renderCards();}
-function delN(id){
-  const i=N.findIndex(n=>n.id===id);if(i<0)return;const n=N[i];if(n.isMe){toast('"나"는 삭제 불가');return;}
-  // Clear refs
-  [['fa',fa],['mo',mo],['pgf',pgf],['pgm',pgm],['mgf',mgf],['mgm',mgm],['mySpouse',mySpouse],['sfa',sfa],['smo',smo],['spgf',spgf],['spgm',spgm],['smgf',smgf],['smgm',smgm]].forEach(([k,v])=>{if(v&&v.id===id)eval(k+'=null');});
-  n.el.remove();N.splice(i,1);C=C.filter(c=>c.from!==id&&c.to!==id);twins=twins.filter(t=>!t.includes(id));
-  if(selNode&&selNode.id===id)selNode=null;
-  renderLines();renderCards();renderSpFam();toast('삭제됨');
+function addSpouseToSel(gender){
+  if(!selNode){toast('구성원을 먼저 선택하세요');return}
+  if(getSpouse(selNode.id)){toast('이미 배우자가 있습니다');return}
+  snap();
+  const sp=mkNode(gender,selNode.x+SG,selNode.y,'배우자',false,selNode.gen);
+  nodes.push(sp);conns.push({from:selNode.id,to:sp.id,type:'spouse',relStyle:'normal'});
+  autoLayout();toast('배우자 추가');
 }
 
-const modeBtns={connect:'btnConn',spouse:'btnSp',twin:'btnTwin',delete:'btnDel',markDec:'btnDec',
-  lnNorm:'btnLN',lnClose:'btnLC',lnDist:'btnLD',lnCut:'btnLX',lnConf:'btnLF',lnDiv:'btnLDv',lnSep:'btnLSp'};
-function tgMode(m){
-  mode=mode===m?'select':m;
-  Object.values(modeBtns).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active','da-a');});
-  if(mode!=='select'&&modeBtns[mode]){const el=document.getElementById(modeBtns[mode]);el.classList.add(mode==='delete'?'da-a':'active');}
-  carea.classList.toggle('connecting',mode==='connect'||mode==='spouse'||mode==='twin');
-  carea.classList.toggle('deleting',mode==='delete');
+function addChildToCouple(gender){
+  if(!selCouple){toast('부부를 먼저 선택하세요 (더블클릭)');return}
+  snap();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;
+  const cGen=Math.min(a.gen,b.gen)-1;
+  const child=mkNode(gender,0,0,'이름',false,cGen);nodes.push(child);
+  conns.push({from:selCouple.a,to:child.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:child.id,type:'parent',relStyle:'normal'});
+  autoLayout();toast('자녀 추가');
 }
 
-function setMyGender(g){snap();meGender=g;document.getElementById('gM').classList.toggle('sel',g==='male');document.getElementById('gF').classList.toggle('sel',g==='female');if(meNode){meNode.type=g;meNode.el.className=`node ${g} is-me`+(meNode.el.classList.contains('selected')?' selected':'');}renderLines();renderCards();}
-
-function addCS(from,to,type){if(!C.find(c=>(c.from===from&&c.to===to&&c.type===type)||(c.from===to&&c.to===from&&c.type===type)))C.push({from,to,type,relStyle:'normal'});}
-
-function addParents(side){
-  if(side==='me'){
-    if(fa&&mo){toast('부모님이 이미 있습니다');return;}snap();
-    const py=meNode.y-GG;
-    if(!fa){fa=mkN('male',meNode.x-SG/2-NW/2,py,'아버지',false);N.push(fa);}
-    if(!mo){mo=mkN('female',meNode.x+SG/2-NW/2,py,'어머니',false);N.push(mo);}
-    addCS(fa.id,mo.id,'spouse');addCS(fa.id,meNode.id,'parent');addCS(mo.id,meNode.id,'parent');
-  } else if(side==='spouse'){
-    if(!mySpouse){toast('먼저 배우자를 추가하세요');return;}
-    if(sfa&&smo){toast('배우자 부모님이 이미 있습니다');return;}snap();
-    const py=mySpouse.y-GG;
-    if(!sfa){sfa=mkN('male',mySpouse.x-SG/2-NW/2,py,'시/장아버지',false);N.push(sfa);}
-    if(!smo){smo=mkN('female',mySpouse.x+SG/2-NW/2,py,'시/장어머니',false);N.push(smo);}
-    addCS(sfa.id,smo.id,'spouse');addCS(sfa.id,mySpouse.id,'parent');addCS(smo.id,mySpouse.id,'parent');
-  }
-  autoLayout();renderCards();renderSpFam();toast('부모님 추가');
+/* ── ADD SIBLING ── */
+function addSibToSel(gender,label){
+  if(!selNode){toast('구성원을 먼저 선택하세요');return}
+  const parents=getParents(selNode.id);
+  if(parents.length<2){toast('선택된 구성원에게 부모님이 필요합니다');return}
+  // Find the spouse pair among parents
+  let p1=parents[0],p2=parents[1];
+  snap();
+  const sib=mkNode(gender,0,0,label,false,selNode.gen);
+  nodes.push(sib);
+  conns.push({from:p1.id,to:sib.id,type:'parent',relStyle:'normal'},{from:p2.id,to:sib.id,type:'parent',relStyle:'normal'});
+  autoLayout();toast(`${label} 추가`);
 }
 
-function addGP(side,which){
-  if(side==='me'){
-    if(!fa||!mo){toast('먼저 부모님을 추가하세요');return;}
-    if(which==='paternal'){
-      if(pgf&&pgm){toast('이미 있습니다');return;}snap();
-      const py=fa.y-GG;pgf=mkN('male',fa.x-SG/2-NW/2,py,'친할아버지',false);pgm=mkN('female',fa.x+SG/2-NW/2,py,'친할머니',false);
-      N.push(pgf,pgm);addCS(pgf.id,pgm.id,'spouse');addCS(pgf.id,fa.id,'parent');addCS(pgm.id,fa.id,'parent');
-    } else {
-      if(mgf&&mgm){toast('이미 있습니다');return;}snap();
-      const py=mo.y-GG;mgf=mkN('male',mo.x-SG/2-NW/2,py,'외할아버지',false);mgm=mkN('female',mo.x+SG/2-NW/2,py,'외할머니',false);
-      N.push(mgf,mgm);addCS(mgf.id,mgm.id,'spouse');addCS(mgf.id,mo.id,'parent');addCS(mgm.id,mo.id,'parent');
-    }
-  } else if(side==='spouse'){
-    if(!sfa||!smo){toast('먼저 배우자 부모님을 추가하세요');return;}
-    if(which==='paternal'){
-      if(spgf&&spgm){toast('이미 있습니다');return;}snap();
-      const py=sfa.y-GG;spgf=mkN('male',sfa.x-SG/2-NW/2,py,'(배)친할아버지',false);spgm=mkN('female',sfa.x+SG/2-NW/2,py,'(배)친할머니',false);
-      N.push(spgf,spgm);addCS(spgf.id,spgm.id,'spouse');addCS(spgf.id,sfa.id,'parent');addCS(spgm.id,sfa.id,'parent');
-    } else {
-      if(smgf&&smgm){toast('이미 있습니다');return;}snap();
-      const py=smo.y-GG;smgf=mkN('male',smo.x-SG/2-NW/2,py,'(배)외할아버지',false);smgm=mkN('female',smo.x+SG/2-NW/2,py,'(배)외할머니',false);
-      N.push(smgf,smgm);addCS(smgf.id,smgm.id,'spouse');addCS(smgf.id,smo.id,'parent');addCS(smgm.id,smo.id,'parent');
-    }
-  }
-  autoLayout();renderCards();renderSpFam();toast('조부모님 추가');
+function addTwins(count){
+  hideAllDD();if(!selCouple){toast('부부를 먼저 선택하세요');return}
+  snap();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;
+  const cGen=Math.min(a.gen,b.gen)-1;const tIds=[];
+  for(let i=0;i<count;i++){const child=mkNode('male',0,0,'쌍둥이'+(i+1),false,cGen);nodes.push(child);conns.push({from:selCouple.a,to:child.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:child.id,type:'parent',relStyle:'normal'});tIds.push(child.id)}
+  twinGroups.push(tIds);autoLayout();toast(`쌍둥이 ${count}명 추가`);
 }
 
-function addSpouse(gender){
-  snap();const ref=meNode;
-  const sx=ref.x+NW+SG-NW/2,sy=ref.y;
-  mySpouse=mkN(gender,sx,sy,'배우자',false);N.push(mySpouse);
-  addCS(ref.id,mySpouse.id,'spouse');
-  autoLayout();renderCards();renderSpFam();toast('배우자/연인 추가');
-}
+function addFree(type){snap();const n=mkNode(type,IW/2-NW/2+(Math.random()*40-20),IH/2-NH/2+(Math.random()*40-20),'이름',false,0,true);nodes.push(n);renderAll()}
+function delNode(id){const i=nodes.findIndex(n=>n.id===id);if(i<0)return;const n=nodes[i];if(n.isMe){toast('"나"는 삭제 불가');return}n.el.remove();nodes.splice(i,1);conns=conns.filter(c=>c.from!==id&&c.to!==id);twinGroups=twinGroups.map(tg=>tg.filter(t=>t!==id)).filter(tg=>tg.length>=2);if(selNode?.id===id){selNode=null;updateSelInfo()}if(selCouple&&(selCouple.a===id||selCouple.b===id))clearCoupleSelection();renderAll();toast('삭제됨')}
 
-function addSib(gender,label){
-  if(!fa||!mo){toast('먼저 부모님을 추가하세요');return;}snap();
-  const kids=childrenOf(fa.id,mo.id);const cns=kids.map(id=>N.find(n=>n.id===id)).filter(Boolean);
-  let cx;const cy=meNode.y;
-  if(label==='형/오빠'||label==='언니/누나')cx=Math.min(...cns.map(n=>n.x))-SBG;
-  else cx=Math.max(...cns.map(n=>n.x))+SBG;
-  const child=mkN(gender,cx,cy,label,false);N.push(child);
-  addCS(fa.id,child.id,'parent');addCS(mo.id,child.id,'parent');
-  autoLayout();renderCards();toast(`${label} 추가`);
-}
+const modeBtns={connect:'btnConn',spouse:'btnSpo',genderToggle:'btnGT',decToggle:'btnDT',delete:'btnDel',lnNorm:'lnN',lnClose:'lnC',lnDist:'lnD',lnCut:'lnX',lnConf:'lnF',lnDiv:'lnDv',lnSep:'lnSp'};
+function tg(m){mode=mode===m?'select':m;Object.values(modeBtns).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active','da-a')});if(mode!=='select'&&modeBtns[mode])document.getElementById(modeBtns[mode]).classList.add(mode==='delete'?'da-a':'active');ca.classList.toggle('connecting',mode==='connect'||mode==='spouse');ca.classList.toggle('deleting',mode==='delete')}
+function setMyGender(g){snap();meGender=g;document.getElementById('gM').classList.toggle('sel',g==='male');document.getElementById('gF').classList.toggle('sel',g==='female');if(meNode){meNode.type=g;meNode.el.className=`node ${g} is-me`}renderAll()}
 
-/* ── RENDER SPOUSE FAMILY BUTTONS ── */
-function renderSpFam(){
-  const sec=document.getElementById('spouseFamSec');sec.innerHTML='';
-  if(!mySpouse)return;
-  let html=`<div class="sec sp-fam-sec"><h3>배우자 가족</h3><div class="br">`;
-  html+=`<button class="b" onclick="addParents('spouse')"><span class="i nb">+</span>배우자 부모님</button>`;
-  html+=`<button class="b" onclick="addGP('spouse','paternal')"><span class="i nb">+</span>배우자 친조부모님</button>`;
-  html+=`<button class="b" onclick="addGP('spouse','maternal')"><span class="i nb">+</span>배우자 외조부모님</button>`;
-  html+=`</div></div>`;
-  sec.innerHTML=html;
-}
-
-/* ── AUTO LAYOUT ── */
+/* ═══════ AUTO LAYOUT — spouse-pair aware ═══════ */
 function autoLayout(){
-  // Collect generations
-  // Gen0: grandparents, Gen1: parents, Gen2: me+spouse+siblings
-  const g0L=[],g0R=[]; // left=paternal/my, right=maternal/my
-  const g0SL=[],g0SR=[]; // spouse grandparents
-  if(pgf)g0L.push(pgf);if(pgm)g0L.push(pgm);
-  if(mgf)g0R.push(mgf);if(mgm)g0R.push(mgm);
-  if(spgf)g0SL.push(spgf);if(spgm)g0SL.push(spgm);
-  if(smgf)g0SR.push(smgf);if(smgm)g0SR.push(smgm);
-  const g0=[...g0L,...g0R,...g0SL,...g0SR];
+  recalcGens();
+  const genMap=new Map();
+  nodes.forEach(n=>{if(!n.free||isConnected(n.id)){if(!genMap.has(n.gen))genMap.set(n.gen,[]);genMap.get(n.gen).push(n)}});
+  const gens=[...genMap.keys()].sort((a,b)=>b-a);
 
-  const g1L=[];if(fa)g1L.push(fa);if(mo)g1L.push(mo);
-  const g1R=[];if(sfa)g1R.push(sfa);if(smo)g1R.push(smo);
-  const g1=[...g1L,...g1R];
+  // Y positions
+  const totalH=(gens.length-1)*GG+NH;const startY=Math.max(10,(IH-totalH)/2);
+  const genY=new Map();gens.forEach((g,i)=>genY.set(g,startY+i*GG));
+  nodes.forEach(n=>{if(genY.has(n.gen)&&(!n.free||isConnected(n.id)))n.y=genY.get(n.gen)});
 
-  const g2=[];
-  if(fa&&mo){childrenOf(fa.id,mo.id).forEach(id=>{const n=N.find(nn=>nn.id===id);if(n&&!g2.includes(n))g2.push(n);});}
-  if(!g2.includes(meNode))g2.push(meNode);
-  if(mySpouse&&!g2.includes(mySpouse))g2.push(mySpouse);
-
-  // Sort gen2
-  g2.sort((a,b)=>{
-    function r(n){if(n.isMe)return 50;if(n===mySpouse)return 51;const o={'형/오빠':10,'언니/누나':20,'남동생':60,'여동생':70};return o[n.name]??45;}
-    return r(a)-r(b);
+  // Build spouse-pair blocks for each gen
+  gens.forEach(g=>{
+    const row=genMap.get(g);
+    const blocks=buildBlocks(row);
+    // Order blocks by child-anchor
+    blocks.sort((a,b)=>blockAnchor(a)-blockAnchor(b));
+    // Place blocks
+    let curX=0;
+    blocks.forEach(blk=>{
+      if(blk.length===2){
+        // Spouse pair: ensure left-right order
+        blk[0].x=curX;blk[1].x=curX+SG;curX+=SG+NW+MG;
+      } else {
+        blk[0].x=curX;curX+=NW+MG;
+      }
+    });
   });
 
-  const hasG0=g0.length>0,hasG1=g1.length>0;
-  let gc=1;if(hasG1)gc++;if(hasG0)gc++;
-  const tH=(gc-1)*GG+NH;const sY=Math.max(20,(IH-tH)/2);
-  let y0=sY,y1=hasG0?sY+GG:sY,y2=hasG1?y1+GG:y1;
-  if(!hasG0&&!hasG1)y2=(IH-NH)/2;
-  else if(!hasG0)y2=y1+GG;
+  // Multi-pass centering
+  for(let pass=0;pass<5;pass++){
+    // Center parents above children
+    gens.forEach(g=>{
+      const row=genMap.get(g);if(!row)return;
+      const blocks=buildBlocks(row);
+      blocks.forEach(blk=>{
+        const n=blk[0];
+        const allChildren=[...getChildren(n.id)];
+        if(blk.length===2)allChildren.push(...getChildren(blk[1].id));
+        const unique=[...new Set(allChildren.map(c=>c.id))].map(id=>gn(id)).filter(Boolean);
+        if(!unique.length)return;
+        const kidXs=unique.map(c=>c.x+NW/2);
+        const kidCenter=(Math.min(...kidXs)+Math.max(...kidXs))/2;
+        if(blk.length===2){
+          const bCenter=(blk[0].x+blk[1].x+NW)/2;
+          const shift=kidCenter-bCenter;
+          blk[0].x+=shift;blk[1].x+=shift;
+        } else {
+          n.x=kidCenter-NW/2;
+        }
+      });
+      resolveOverlaps(row);
+    });
 
-  const cx=IW/2;
-
-  // Gen2 layout
-  g2.forEach((n,i)=>{n.x=cx-(g2.length-1)*SBG/2+i*SBG-NW/2;n.y=y2;sp(n);});
-
-  // Gen1 layout: my parents centered over me, spouse parents centered over spouse
-  if(g1L.length){
-    // Find me center in gen2
-    const meCx=meNode.x+NW/2;
-    if(fa){fa.x=meCx-SG/2-NW/2;fa.y=y1;sp(fa);}
-    if(mo){mo.x=meCx+SG/2-NW/2;mo.y=y1;sp(mo);}
+    // Center children under parents
+    const gensSorted=[...gens].sort((a,b)=>a-b);
+    gensSorted.forEach(g=>{
+      const row=genMap.get(g);if(!row)return;
+      row.forEach(n=>{
+        const parents=getParents(n.id);
+        if(parents.length<2)return;
+        const siblings=childrenOfCouple(parents[0].id,parents[1].id).map(id=>gn(id)).filter(Boolean);
+        if(siblings.length<=1){
+          const pc=(parents[0].x+parents[1].x+NW)/2;
+          n.x=pc-NW/2;
+        }
+      });
+      resolveOverlaps(row);
+    });
   }
-  if(g1R.length&&mySpouse){
-    const spCx=mySpouse.x+NW/2;
-    if(sfa){sfa.x=spCx-SG/2-NW/2;sfa.y=y1;sp(sfa);}
-    if(smo){smo.x=spCx+SG/2-NW/2;smo.y=y1;sp(smo);}
-  }
 
-  // Gen0 layout
-  if(pgf&&pgm&&fa){const fc=fa.x+NW/2;pgf.x=fc-SG/2-NW/2;pgf.y=y0;pgm.x=fc+SG/2-NW/2;pgm.y=y0;sp(pgf);sp(pgm);}
-  if(mgf&&mgm&&mo){const mc=mo.x+NW/2;mgf.x=mc-SG/2-NW/2;mgf.y=y0;mgm.x=mc+SG/2-NW/2;mgm.y=y0;sp(mgf);sp(mgm);}
-  if(spgf&&spgm&&sfa){const fc=sfa.x+NW/2;spgf.x=fc-SG/2-NW/2;spgf.y=y0;spgm.x=fc+SG/2-NW/2;spgm.y=y0;sp(spgf);sp(spgm);}
-  if(smgf&&smgm&&smo){const mc=smo.x+NW/2;smgf.x=mc-SG/2-NW/2;smgf.y=y0;smgm.x=mc+SG/2-NW/2;smgm.y=y0;sp(smgf);sp(smgm);}
+  // Final overlap resolution
+  gens.forEach(g=>{const row=genMap.get(g);if(row)resolveOverlaps(row)});
 
-  // Fix overlaps between adjacent grandparent pairs
-  fixOverlap(pgm,mgf,pgf,pgm,mgf,mgm,fa,mo,null,null);
-  fixOverlap(mgm,sfa?N.find(n=>n.id===sfa?.id):null, mgf,mgm, sfa?spgf:null,sfa?spgm:null, mo,sfa, null,null);
-  if(spgm&&smgf)fixOverlap(spgm,smgf,spgf,spgm,smgf,smgm,sfa,smo,null,null);
+  // Center on canvas
+  let mnX=Infinity,mxX=-Infinity;
+  nodes.filter(n=>!n.free||isConnected(n.id)).forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW)});
+  if(mnX<Infinity){const shX=(IW-(mxX-mnX))/2-mnX;nodes.filter(n=>!n.free||isConnected(n.id)).forEach(n=>{n.x+=shX})}
 
-  // Global centering
-  const all=[...g0,...g1,...g2].filter(Boolean);
-  if(all.length){
-    let mnX=Infinity,mxX=-Infinity;
-    all.forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW);});
-    const sh=(IW-(mxX-mnX))/2-mnX;
-    if(Math.abs(sh)>2)all.forEach(n=>{n.x+=sh;sp(n);});
-  }
-  renderLines();
+  nodes.forEach(n=>setPos(n));renderLines();renderCards();
 }
 
-function fixOverlap(rightOfLeft,leftOfRight,lp1,lp2,rp1,rp2,lParent,rParent){
-  if(!rightOfLeft||!leftOfRight)return;
-  const gap=leftOfRight.x-(rightOfLeft.x+NW);
-  if(gap<20){
-    const sh=(20-gap)/2+5;
-    [lp1,lp2].filter(Boolean).forEach(n=>{n.x-=sh;sp(n);});
-    [rp1,rp2].filter(Boolean).forEach(n=>{n.x+=sh;sp(n);});
-    if(lParent){lParent.x-=sh;sp(lParent);}
-    if(rParent){rParent.x+=sh;sp(rParent);}
+function buildBlocks(row){
+  // Group spouse pairs as single blocks
+  const used=new Set(),blocks=[];
+  // Sort by x first
+  row.sort((a,b)=>a.x-b.x);
+  row.forEach(n=>{
+    if(used.has(n.id))return;used.add(n.id);
+    const sp=getSpouse(n.id);
+    if(sp&&row.includes(sp)&&!used.has(sp.id)){
+      used.add(sp.id);
+      // Ensure consistent left-right
+      if(n.x<=sp.x)blocks.push([n,sp]);else blocks.push([sp,n]);
+    } else blocks.push([n]);
+  });
+  return blocks;
+}
+
+function blockAnchor(blk){
+  let xs=[];
+  blk.forEach(n=>{
+    getChildren(n.id).forEach(c=>xs.push(c.x+NW/2));
+    const parents=getParents(n.id);
+    parents.forEach(p=>xs.push(p.x+NW/2));
+  });
+  if(xs.length)return xs.reduce((a,b)=>a+b,0)/xs.length;
+  return blk[0].x;
+}
+
+function resolveOverlaps(row){
+  if(!row||row.length<2)return;
+  const blocks=buildBlocks(row);
+  blocks.sort((a,b)=>a[0].x-b[0].x);
+  for(let iter=0;iter<10;iter++){
+    let moved=false;
+    for(let i=1;i<blocks.length;i++){
+      const prev=blocks[i-1],cur=blocks[i];
+      const prevRight=prev[prev.length-1].x+NW;
+      const curLeft=cur[0].x;
+      const needed=prevRight+MG;
+      if(curLeft<needed){
+        const shift=needed-curLeft;
+        cur.forEach(n=>{n.x+=shift});moved=true;
+      }
+    }
+    if(!moved)break;
   }
 }
 
-function sp(n){if(n&&n.el){n.el.style.left=n.x+'px';n.el.style.top=n.y+'px';}}
+function recalcGens(){
+  if(!meNode)return;
+  const visited=new Set();
+  const queue=[{id:meNode.id,gen:0}];visited.add(meNode.id);
+  while(queue.length){
+    const{id,gen}=queue.shift();const n=gn(id);if(!n)continue;n.gen=gen;
+    const sp=getSpouse(id);if(sp&&!visited.has(sp.id)){visited.add(sp.id);queue.push({id:sp.id,gen})}
+    getParents(id).forEach(p=>{if(!visited.has(p.id)){visited.add(p.id);queue.push({id:p.id,gen:gen+1})}});
+    getChildren(id).forEach(c=>{if(!visited.has(c.id)){visited.add(c.id);queue.push({id:c.id,gen:gen-1})}});
+  }
+}
 
-/* ── CENTER ALL ── */
+/* ── CENTER ALL — preserve relative positions ── */
 function centerAll(){
-  if(!N.length)return;
+  if(!nodes.length)return;
   let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;
-  N.forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW+20);mnY=Math.min(mnY,n.y);mxY=Math.max(mxY,n.y+NH+20);});
+  nodes.forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW);mnY=Math.min(mnY,n.y);mxY=Math.max(mxY,n.y+NH+16)});
   const cw=mxX-mnX,ch=mxY-mnY;
   const shX=(IW-cw)/2-mnX,shY=(IH-ch)/2-mnY;
-  N.forEach(n=>{n.x+=shX;n.y+=shY;sp(n);});
+  nodes.forEach(n=>{n.x+=shX;n.y+=shY;setPos(n)});
   renderLines();toast('중앙 정렬 완료');
 }
 
-/* ── MEMBER CARDS ── */
+/* ── CARDS ── */
 function renderCards(){
-  const sc=document.getElementById('mpScroll');sc.innerHTML='';
-  N.forEach(n=>{
-    const card=document.createElement('div');
-    card.className='mc'+(selNode&&selNode.id===n.id?' sel':'');
-    const isFem=n.type==='female'||n.type==='deceased-female';
-    const isDec=n.type.startsWith('deceased');
-    const isUnk=n.type==='unknown';
-    let icCls=isFem?'female':'male';
-    if(isDec)icCls+=' dec';
-    if(isUnk)icCls='unknown';
-
-    card.innerHTML=`<div class="mc-top"><div class="mc-ic ${icCls}"></div><div class="mc-tt">${n.name}${n.isMe?' (나)':''}</div>${n.isMe?'':`<button class="mc-del" data-id="${n.id}">✕</button>`}</div><div class="mc-fields"><div class="mc-f"><label>이름</label><input type="text" value="${n.name}" data-id="${n.id}" data-f="name"></div><div class="mc-f"><label>나이</label><input type="text" value="${n.age||''}" data-id="${n.id}" data-f="age" placeholder="숫자"></div></div>`;
-
-    card.addEventListener('click',e=>{
-      if(e.target.closest('.mc-del')){snap();delN(parseInt(e.target.closest('.mc-del').dataset.id));return;}
-      if(e.target.tagName==='INPUT')return;
-      const nd=N.find(nn=>nn.id===n.id);if(nd)selectN(nd);
-    });
-    card.querySelectorAll('input').forEach(inp=>{
-      inp.addEventListener('input',()=>{
-        const nd=N.find(nn=>nn.id===parseInt(inp.dataset.id));if(!nd)return;
-        const f=inp.dataset.f;
-        if(f==='name'){nd.name=inp.value||'이름';nd.el.querySelector('.nn').textContent=nd.name;card.querySelector('.mc-tt').textContent=nd.name+(nd.isMe?' (나)':'');}
-        else if(f==='age'){nd.age=inp.value;updAge(nd);}
-      });
-    });
+  const sc=document.getElementById('mpSc');sc.innerHTML='';
+  nodes.forEach(n=>{
+    const card=document.createElement('div');card.className='mc'+(selNode?.id===n.id?' sel':'');
+    const fem=isFem(n.type),dec=n.type.startsWith('deceased');let ic=fem?'female':'male';if(dec)ic+=' dec';
+    card.innerHTML=`<div class="mc-top"><div class="mc-ic ${ic}"></div><div class="mc-tt">${n.name}${n.isMe?' (나)':''}</div>${n.isMe?'':`<button class="mc-del" data-id="${n.id}">✕</button>`}</div><div class="mc-f"><label>이름</label><input type="text" value="${n.name}" data-id="${n.id}" data-f="name"></div><div class="mc-f"><label>나이</label><input type="text" value="${n.age||''}" data-id="${n.id}" data-f="age" placeholder="숫자"></div>`;
+    card.addEventListener('click',e=>{if(e.target.closest('.mc-del')){snap();delNode(parseInt(e.target.closest('.mc-del').dataset.id));return}if(e.target.tagName==='INPUT')return;const nd=gn(n.id);if(nd)selectNode(nd)});
+    card.querySelectorAll('input').forEach(inp=>{inp.addEventListener('input',()=>{const nd=gn(parseInt(inp.dataset.id));if(!nd)return;if(inp.dataset.f==='name'){nd.name=inp.value||'이름';nd.el.querySelector('.nn').textContent=nd.name;card.querySelector('.mc-tt').textContent=nd.name+(nd.isMe?' (나)':'')}else if(inp.dataset.f==='age'){nd.age=inp.value;updAge(nd)}})});
     sc.appendChild(card);
-  });
+  });updateSelInfo();
 }
 
-/* ── CTX MENU ── */
-function ctxA(action){
-  ctxEl.classList.remove('show');if(!ctxTgt)return;const n=ctxTgt;
-  switch(action){
-    case 'rename':const nm=n.el.querySelector('.nn');nm.focus();const r=document.createRange();r.selectNodeContents(nm);window.getSelection().removeAllRanges();window.getSelection().addRange(r);break;
-    case 'dup':snap();const d=mkN(n.type,n.x+80,n.y+50,n.name,false);N.push(d);renderLines();renderCards();break;
-    case 'toM':snap();chT(n,'male');break;case 'toF':snap();chT(n,'female');break;
-    case 'toDM':snap();chT(n,'deceased-male');break;case 'toDF':snap();chT(n,'deceased-female');break;
-    case 'del':if(n.isMe)toast('"나"는 삭제 불가');else{snap();delN(n.id);}break;
-  }ctxTgt=null;
-}
-function chT(n,t){n.type=t;n.el.className=`node ${t}`+(n.isMe?' is-me':'')+(n.el.classList.contains('selected')?' selected':'');if(n.isMe){const b=t.replace('deceased-','');meGender=b;document.getElementById('gM').classList.toggle('sel',b==='male');document.getElementById('gF').classList.toggle('sel',b==='female');}renderLines();renderCards();}
+function ctxA(a){ctxEl.classList.remove('show');if(!ctxTgt)return;const n=ctxTgt;switch(a){case 'rename':const nm=n.el.querySelector('.nn');nm.focus();const r=document.createRange();r.selectNodeContents(nm);window.getSelection().removeAllRanges();window.getSelection().addRange(r);break;case 'toM':snap();chT(n,'male');break;case 'toF':snap();chT(n,'female');break;case 'toDM':snap();chT(n,'deceased-male');break;case 'toDF':snap();chT(n,'deceased-female');break;case 'del':if(n.isMe)toast('"나"는 삭제 불가');else{snap();delNode(n.id)}break}ctxTgt=null}
+function chT(n,t){n.type=t;n.el.className=`node ${t}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');if(n.isMe){meGender=baseG(t);document.getElementById('gM').classList.toggle('sel',meGender==='male');document.getElementById('gF').classList.toggle('sel',meGender==='female')}renderAll()}
+function clearAll(){if(nodes.length<=1)return;if(!confirm('초기화하시겠습니까?'))return;snap();nodes.filter(n=>!n.isMe).forEach(n=>n.el.remove());nodes=nodes.filter(n=>n.isMe);conns=[];twinGroups=[];selNode=null;clearCoupleSelection();meNode.x=IW/2-NW/2;meNode.y=IH/2-NH/2;meNode.gen=0;setPos(meNode);renderAll();toast('초기화')}
 
-function clearAll(){
-  if(N.length<=1)return;if(!confirm('초기화하시겠습니까?'))return;snap();
-  N.filter(n=>!n.isMe).forEach(n=>n.el.remove());N=N.filter(n=>n.isMe);C=[];twins=[];
-  fa=mo=pgf=pgm=mgf=mgm=mySpouse=sfa=smo=spgf=spgm=smgf=smgm=null;selNode=null;
-  meNode.x=IW/2-NW/2;meNode.y=IH/2-NH/2;sp(meNode);
-  renderLines();renderCards();renderSpFam();toast('초기화 완료');
-}
+function renderAll(){renderLines();renderCards();updateCoupleInfo()}
+function toast(msg){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1500)}
+function showDecDD(e){e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();const d=document.getElementById('ddDec');d.style.left=(r.right+4)+'px';d.style.top=r.top+'px';d.style.display='block';document.getElementById('ddOv').classList.add('show')}
+function showTwinDD(e){e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();const d=document.getElementById('ddTwin');d.style.left=(r.right+4)+'px';d.style.top=r.top+'px';d.style.display='block';document.getElementById('ddOv').classList.add('show')}
+function hideAllDD(){document.querySelectorAll('.dd-mn').forEach(d=>d.style.display='none');document.getElementById('ddOv').classList.remove('show')}
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1500);}
+function downloadJPG(){document.querySelectorAll('.port').forEach(p=>p.style.display='none');nodes.forEach(n=>n.el.classList.remove('selected','couple-sel'));html2canvas(a4,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false}).then(c=>{const lnk=document.createElement('a');lnk.download='가계도.jpg';lnk.href=c.toDataURL('image/jpeg',.95);lnk.click();document.querySelectorAll('.port').forEach(p=>p.style.display='');toast('JPG 다운로드 완료')}).catch(()=>{document.querySelectorAll('.port').forEach(p=>p.style.display='');toast('다운로드 실패')})}
 
-function showDD(e){e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();const d=document.getElementById('ddMn');d.style.left=r.right+4+'px';d.style.top=r.top+'px';d.style.display='block';document.getElementById('ddOv').classList.add('show');}
-function hideDD(){document.getElementById('ddMn').style.display='none';document.getElementById('ddOv').classList.remove('show');}
+/* ── DRAG with magnet snapping ── */
+ca.addEventListener('mousedown',e=>{if(!e.target.closest('.node')){if(selNode){selNode.el.classList.remove('selected');selNode=null;updateSelInfo();renderCards()}clearCoupleSelection()}});
 
-function downloadJPG(){
-  document.querySelectorAll('.port').forEach(p=>p.style.display='none');
-  const sel=document.querySelector('.node.selected');if(sel)sel.classList.remove('selected');
-  html2canvas(a4,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false}).then(c=>{
-    const lnk=document.createElement('a');lnk.download='가계도.jpg';lnk.href=c.toDataURL('image/jpeg',.95);lnk.click();
-    document.querySelectorAll('.port').forEach(p=>p.style.display='');if(sel)sel.classList.add('selected');toast('JPG 다운로드 완료');
-  }).catch(()=>{document.querySelectorAll('.port').forEach(p=>p.style.display='');if(sel)sel.classList.add('selected');toast('다운로드 실패');});
-}
-
-carea.addEventListener('mousedown',e=>{if(selNode&&!e.target.closest('.node')){selNode.el.classList.remove('selected');selNode=null;renderCards();}});
 document.addEventListener('mousemove',e=>{
-  if(drag){const rect=cinr.getBoundingClientRect();let nx=(e.clientX-rect.left)/scale-dox,ny=(e.clientY-rect.top)/scale-doy;nx=Math.max(0,Math.min(IW-NW,nx));ny=Math.max(0,Math.min(IH-NH,ny));drag.x=nx;drag.y=ny;sp(drag);renderLines();}
-  if(tmpLine&&connFrom){const rect=cinr.getBoundingClientRect();tmpLine.setAttribute('x2',(e.clientX-rect.left)/scale);tmpLine.setAttribute('y2',(e.clientY-rect.top)/scale);}
-});
-document.addEventListener('mouseup',()=>{if(drag){drag.el.classList.remove('dragging');drag=null;}if(connFrom)finConn();});
-document.addEventListener('click',e=>{if(!ctxEl.contains(e.target))ctxEl.classList.remove('show');});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){tgMode(mode);finConn();ctxEl.classList.remove('show');}
-  if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='z'||e.key==='Z')){e.preventDefault();redo();}
-  else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
-});
-carea.addEventListener('contextmenu',e=>e.preventDefault());
+  if(drag){
+    const rect=cinr.getBoundingClientRect();
+    let nx=(e.clientX-rect.left)/scale-dox;
+    nx=Math.max(0,Math.min(IW-NW,nx));
 
-function fitScale(){const aw=window.innerWidth-410,ah=window.innerHeight;scale=Math.min(1,Math.min((aw-20)/PW,(ah-20)/PH));uz();}
+    if(dragIsFree){
+      // Free node: can move Y but snaps to gen rows
+      let ny=(e.clientY-rect.top)/scale-doy;
+      ny=Math.max(0,Math.min(IH-NH,ny));
+      // Find nearest gen Y and snap
+      const genYs=new Set();nodes.forEach(n=>{if(n.id!==drag.id&&!n.free)genYs.add(n.y)});
+      let bestY=ny,bestDist=SNAP_DIST+1;
+      genYs.forEach(gy=>{const d=Math.abs(ny-gy);if(d<bestDist){bestDist=d;bestY=gy}});
+      if(bestDist<=SNAP_DIST)ny=bestY;
+      drag.y=ny;
+    }
+    // else: Y locked (non-free / connected node)
 
-meNode=mkN(meGender,IW/2-NW/2,IH/2-NH/2,'나',true);N.push(meNode);selectN(meNode);
-fitScale();renderLines();renderCards();renderSpFam();updUB();
+    // Parent-center magnet for children
+    const parents=getParents(drag.id);
+    if(parents.length>=2){
+      const p1=parents[0],p2=parents[1];
+      const parentMidX=(p1.x+p2.x+NW)/2;
+      const childCenterX=nx+NW/2;
+      if(Math.abs(childCenterX-parentMidX)<SNAP_DIST){
+        nx=parentMidX-NW/2;
+      }
+    }
+
+    drag.x=nx;setPos(drag);renderLines();
+  }
+  if(tmpLine&&connFrom){const rect=cinr.getBoundingClientRect();tmpLine.setAttribute('x2',(e.clientX-rect.left)/scale);tmpLine.setAttribute('y2',(e.clientY-rect.top)/scale)}
+});
+
+document.addEventListener('mouseup',()=>{if(drag){drag.el.classList.remove('dragging');drag=null;dragIsFree=false}if(connFrom)finConn()});
+document.addEventListener('click',e=>{if(!ctxEl.contains(e.target))ctxEl.classList.remove('show')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){tg(mode);finConn();ctxEl.classList.remove('show');clearCoupleSelection()}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='z'||e.key==='Z')){e.preventDefault();redo()}else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}});
+ca.addEventListener('contextmenu',e=>e.preventDefault());
+
+function fitScale(){const aw=window.innerWidth-504,ah=window.innerHeight;scale=Math.min(1,Math.min((aw-20)/PW,(ah-20)/PH));uz()}
+
+meNode=mkNode(meGender,IW/2-NW/2,IH/2-NH/2,'나',true,0);
+nodes.push(meNode);selectNode(meNode);fitScale();renderAll();updUB();
 window.addEventListener('resize',fitScale);
 </script>
 </body>
