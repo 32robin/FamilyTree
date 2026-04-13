@@ -3,35 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가계도 그리기 v1.0.0</title>
+<title>가계도 그리기 v1.1.0</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--sf:#f7f7f7;--sf2:#ededed;--bd:#d0d0d0;--bdl:#aaa;--tx:#1a1a1a;--txd:#666;--txm:#aaa;--ln:#1a1a1a;--dg:#c0392b;--s-me-bg:#f2f7fc;--s-me-ac:#89afd4;--s-me-bd:#c4d7ea;--s-sel-bg:#f0f7f0;--s-sel-ac:#8bbc8b;--s-sel-bd:#c2dac2;--s-couple-bg:#fdf8ee;--s-couple-ac:#d4b86a;--s-couple-bd:#e8dbb8;--s-sib-bg:#fdf2f4;--s-sib-ac:#c98a94;--s-sib-bd:#e4c5cb;--s-add-bg:#f4f0f8;--s-add-ac:#a694bf;--s-add-bd:#d3cce0;--s-line-bg:#fef4ee;--s-line-ac:#cf9468;--s-line-bd:#e8d0b8;--couple-glow:rgba(212,184,106,.2);--couple-border:#d4b86a;--ft:'Pretendard',system-ui,sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;font-family:var(--ft);background:#ddd;color:var(--tx)}
-.lp{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:100;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column}.lp-hd{padding:16px 18px 22px;border-bottom:1px solid var(--bd);background:#fff;position:relative;display:flex;align-items:center;gap:10px}.lp-hd h1{font-size:20px;font-weight:900;flex:1}.help-btn{padding:5px 12px;border:2px solid #6a4c93;border-radius:6px;background:#e8d5f5;color:#6a4c93;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ft)}.help-btn:hover{background:#dcc5ef}.lp-hd .contact{font-size:11px;color:var(--txm);position:absolute;bottom:4px;left:18px}.lp-sc{flex:1;overflow-y:auto}.sec{padding:14px 14px 10px;margin:0 0 2px}.sec h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;padding:0 0 0 8px;border-left:4px solid var(--txm)}.br{display:flex;flex-direction:column;gap:5px}
+.lp{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:100;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column}
+.lp-hd{padding:16px 18px 22px;border-bottom:1px solid var(--bd);background:#fff;position:relative;display:flex;align-items:center;gap:10px}.lp-hd h1{font-size:20px;font-weight:900;flex:1}.help-btn{padding:5px 12px;border:2px solid #6a4c93;border-radius:6px;background:#e8d5f5;color:#6a4c93;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ft)}.help-btn:hover{background:#dcc5ef}.lp-hd .contact{font-size:11px;color:var(--txm);position:absolute;bottom:4px;left:18px}
+.lp-sc{flex:1;overflow-y:auto}.sec{padding:14px 14px 10px;margin:0 0 2px}.sec h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;padding:0 0 0 8px;border-left:4px solid var(--txm)}.br{display:flex;flex-direction:column;gap:5px}
 .sec.s-me{background:var(--s-me-bg)}.sec.s-me h3{color:var(--s-me-ac);border-color:var(--s-me-ac)}.sec.s-sel{background:var(--s-sel-bg)}.sec.s-sel h3{color:var(--s-sel-ac);border-color:var(--s-sel-ac)}.sec.s-couple{background:var(--s-couple-bg)}.sec.s-couple h3{color:var(--s-couple-ac);border-color:var(--s-couple-ac)}.sec.s-sib{background:var(--s-sib-bg)}.sec.s-sib h3{color:var(--s-sib-ac);border-color:var(--s-sib-ac)}.sec.s-add{background:var(--s-add-bg)}.sec.s-add h3{color:var(--s-add-ac);border-color:var(--s-add-ac)}
-.b{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ft);text-align:left;transition:all .12s}.b:hover{background:var(--sf2)}.b:active{transform:scale(.98)}.b .ic{width:26px;height:26px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid var(--ln);background:#fff;position:relative}.b .ic.ci{border:none;background:transparent}.b .ic.ci::before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;border:2px solid var(--ln);background:#fff;top:3px;left:3px}.b .ic.nb{border:none;font-size:15px;border-radius:4px}.b .ic.xi{border:none;background:transparent}.b .ic.xi::before,.b .ic.xi::after{content:'';position:absolute;top:50%;left:50%;width:17px;height:2px;background:var(--ln)}.b .ic.xi::before{transform:translate(-50%,-50%) rotate(45deg)}.b .ic.xi::after{transform:translate(-50%,-50%) rotate(-45deg)}.b .ic.tri{border:none;background:transparent}.b .ic.tri::before{content:'';position:absolute;top:4px;left:5px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--ln)}.b .ic.zzig{border:none;background:transparent}.b .ic.zzig svg{width:22px;height:14px}
-.sec.s-sel .b .ic.nb{background:var(--s-sel-bd)}.sec.s-couple .b .ic.nb{background:var(--s-couple-bd)}.sec.s-sib .b .ic.nb{background:var(--s-sib-bd)}.sec.s-add .b .ic.nb{background:var(--s-add-bd)}.b.active{background:var(--tx);color:#fff;border-color:var(--tx)}.b.active .ic{border-color:#fff;background:rgba(255,255,255,.12)}.b.active .ic.nb{background:rgba(255,255,255,.18)}.b.active .ic.ci::before{border-color:#fff}
+.b{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ft);text-align:left;transition:all .12s}.b:hover{background:var(--sf2)}.b:active{transform:scale(.98)}
+.b .ic{width:26px;height:26px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid var(--ln);background:#fff;position:relative}
+.b .ic.ci{border:none;background:transparent}.b .ic.ci::before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;border:2px solid var(--ln);background:#fff;top:3px;left:3px}
+.b .ic.nb{border:none;font-size:15px;border-radius:4px}
+.b .ic.xi{border:none;background:transparent}.b .ic.xi::before,.b .ic.xi::after{content:'';position:absolute;top:50%;left:50%;width:17px;height:2px;background:var(--ln)}.b .ic.xi::before{transform:translate(-50%,-50%) rotate(45deg)}.b .ic.xi::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.b .ic.tri{border:none;background:transparent}.b .ic.tri::before{content:'';position:absolute;top:4px;left:5px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--ln)}
+.b .ic.mc-icon{border:none;background:transparent}.b .ic.mc-icon::before{content:'';position:absolute;top:5px;left:5px;width:16px;height:16px;border-radius:50%;background:var(--ln)}
+.b .ic.ab-icon{border:none;background:transparent}.b .ic.ab-icon::before,.b .ic.ab-icon::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:2.5px;background:var(--ln)}.b .ic.ab-icon::before{transform:translate(-50%,-50%) rotate(45deg)}.b .ic.ab-icon::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.b .ic.dbl{border:none;background:transparent;position:relative}.b .ic.dbl::before,.b .ic.dbl::after{content:'';position:absolute;left:3px;right:3px;height:2.2px;background:var(--ln)}.b .ic.dbl::before{top:9px}.b .ic.dbl::after{top:15px}
+.b .ic.tpl{border:none;background:transparent;position:relative}.b .ic.tpl span{position:absolute;left:3px;right:3px;height:2px;background:var(--ln)}.b .ic.tpl span:nth-child(1){top:6px}.b .ic.tpl span:nth-child(2){top:12px}.b .ic.tpl span:nth-child(3){top:18px}
+.b .ic.zzig{border:none;background:transparent}.b .ic.zzig svg{width:22px;height:14px}
+.sec.s-sel .b .ic.nb{background:var(--s-sel-bd)}.sec.s-couple .b .ic.nb{background:var(--s-couple-bd)}.sec.s-sib .b .ic.nb{background:var(--s-sib-bd)}.sec.s-add .b .ic.nb{background:var(--s-add-bd)}
+.b.active{background:var(--tx);color:#fff;border-color:var(--tx)}.b.active .ic{border-color:#fff;background:rgba(255,255,255,.12)}.b.active .ic.nb{background:rgba(255,255,255,.18)}.b.active .ic.ci::before{border-color:#fff}.b.active .ic.dbl::before,.b.active .ic.dbl::after{background:#fff}.b.active .ic.tpl span{background:#fff}
 .me-box{background:#fff;border:1px solid var(--s-me-bd);border-radius:6px;margin:0 14px;padding:12px}.me-box .ml{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--s-me-ac)}.gr{display:flex;gap:5px}.gb{flex:1;padding:9px 0;border:1px solid var(--bd);border-radius:5px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--ft);text-align:center}.gb:hover{background:var(--sf2)}.gb.sel{background:var(--tx);color:#fff;border-color:var(--tx)}
-.sel-info{background:#fff;border:1px solid var(--bd);border-radius:6px;margin:0 14px;padding:13px;font-size:14px;color:var(--txd);min-height:42px;line-height:1.5}.sel-info strong{color:var(--tx);font-weight:800;font-size:15px}.sel-info .ctag{display:inline-block;background:var(--couple-glow);border:1px solid var(--couple-border);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700;color:#b8860b;margin-left:5px}
+
+/* 선택 알림 박스 스타일 수정 */
+.sel-info{background:#fff1f1;border:1px solid #ffcdd2;border-radius:6px;margin:0 14px;padding:13px;font-size:14px;color:#d32f2f;min-height:42px;line-height:1.5;font-weight:700}
+.sel-info.active{background:#fff;border-color:var(--bd);color:var(--txd);font-weight:400}
+.sel-info.active strong{color:var(--tx);font-weight:800;font-size:15px}
+
+.sel-info .ctag{display:inline-block;background:var(--couple-glow);border:1px solid var(--couple-border);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700;color:#b8860b;margin-left:5px}
+.hint-txt{font-size:10px;color:var(--txm);line-height:1.5;padding:4px 14px 0;font-weight:500}
 .lp-ft{padding:10px 16px;border-top:1px solid var(--bd);font-size:11px;color:var(--txm);line-height:1.8;flex-shrink:0;background:#fff}.lp-ft kbd{display:inline-block;padding:1px 5px;border-radius:3px;background:var(--sf2);border:1px solid var(--bd);font-size:10px;font-family:var(--ft)}
-.mp{position:fixed;left:300px;top:0;bottom:0;width:240px;z-index:90;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column}.mp-hd{padding:13px;border-bottom:1px solid var(--bd);font-size:14px;font-weight:800}.mp-sc{flex:1;overflow-y:auto;padding:7px}.mc{border:1px solid var(--bd);border-radius:5px;padding:7px 9px;margin-bottom:5px;background:var(--sf);cursor:pointer}.mc:hover{border-color:var(--bdl)}.mc.sel{border-color:var(--tx);background:#fff}.mc-top{display:flex;align-items:center;gap:5px;margin-bottom:5px}.mc-ic{width:17px;height:17px;border:1.4px solid var(--ln);background:#fff;flex-shrink:0;position:relative}.mc-ic.male{border-radius:0}.mc-ic.female{border-radius:50%}.mc-ic.dec::before,.mc-ic.dec::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:1.4px;background:var(--ln);z-index:1}.mc-ic.dec::before{transform:translate(-50%,-50%) rotate(45deg)}.mc-ic.dec::after{transform:translate(-50%,-50%) rotate(-45deg)}.mc-ic.dec.female{border-radius:50%}.mc-ic.preg{border:none;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--ln);margin:0 1px}.mc-tt{font-size:12px;font-weight:800;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mc-del{width:20px;height:20px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--txm);display:flex;align-items:center;justify-content:center;border-radius:3px}.mc-del:hover{background:var(--sf2);color:var(--dg)}.mc-fields{display:flex;gap:5px}.mc-f{display:flex;align-items:center;gap:3px;flex:1}.mc-f label{font-size:10px;color:var(--txd);width:24px;flex-shrink:0;font-weight:700}.mc-f input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:3px;padding:4px 5px;font-size:11px;font-family:var(--ft);outline:none}.mc-f input:focus{border-color:var(--tx)}
+.mp{position:fixed;left:300px;top:0;bottom:0;width:240px;z-index:90;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column}.mp-hd{padding:13px;border-bottom:1px solid var(--bd);font-size:14px;font-weight:800}.mp-sc{flex:1;overflow-y:auto;padding:7px}
+.mc{border:1px solid var(--bd);border-radius:5px;padding:7px 9px;margin-bottom:5px;background:var(--sf);cursor:pointer}.mc:hover{border-color:var(--bdl)}.mc.sel{border-color:var(--tx);background:#fff}.mc-top{display:flex;align-items:center;gap:5px;margin-bottom:5px}.mc-ic{width:17px;height:17px;border:1.4px solid var(--ln);background:#fff;flex-shrink:0;position:relative}.mc-ic.male{border-radius:0}.mc-ic.female{border-radius:50%}.mc-ic.dec::before,.mc-ic.dec::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:1.4px;background:var(--ln);z-index:1}.mc-ic.dec::before{transform:translate(-50%,-50%) rotate(45deg)}.mc-ic.dec::after{transform:translate(-50%,-50%) rotate(-45deg)}.mc-ic.dec.female{border-radius:50%}
+.mc-ic.preg{border:none;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--ln);margin:0 1px}
+.mc-ic.misc{border:none;width:12px;height:12px;border-radius:50%;background:var(--ln)}
+.mc-ic.abrt{border:none;position:relative;width:14px;height:14px}.mc-ic.abrt::before,.mc-ic.abrt::after{content:'';position:absolute;top:50%;left:50%;width:12px;height:2px;background:var(--ln)}.mc-ic.abrt::before{transform:translate(-50%,-50%) rotate(45deg)}.mc-ic.abrt::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.mc-tt{font-size:12px;font-weight:800;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mc-del{width:20px;height:20px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--txm);display:flex;align-items:center;justify-content:center;border-radius:3px}.mc-del:hover{background:var(--sf2);color:var(--dg)}.mc-fields{display:flex;gap:5px}.mc-f{display:flex;align-items:center;gap:3px;flex:1}.mc-f label{font-size:10px;color:var(--txd);width:24px;flex-shrink:0;font-weight:700}.mc-f input{width:100%;min-width:0;border:1px solid var(--bd);border-radius:3px;padding:4px 5px;font-size:11px;font-family:var(--ft);outline:none}.mc-f input:focus{border-color:var(--tx)}
 .ca{position:fixed;left:540px;top:0;right:0;bottom:0;display:flex;flex-direction:column;background:#ddd;overflow:hidden}.ca.connecting{cursor:crosshair}.ca.deleting{cursor:not-allowed}
-.ca-toolbar{display:flex;align-items:center;gap:4px;padding:7px 10px;background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;z-index:10}.ca-toolbar .tb{padding:6px 11px;border:1px solid var(--bd);border-radius:5px;background:#fff;color:var(--tx);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;transition:all .1s;white-space:nowrap}.ca-toolbar .tb:hover{background:var(--sf2)}.ca-toolbar .tb.active{background:var(--tx);color:#fff;border-color:var(--tx)}.ca-toolbar .tb.magic{background:linear-gradient(135deg,#e8d5f5,#d5e8f5);border-color:#b8a0d0;color:#6a4c93;font-weight:800}.ca-toolbar .tb.magic:hover{background:linear-gradient(135deg,#dcc5ef,#c5ddf0)}.ca-toolbar .tb.del-btn{color:var(--dg);border-color:#f5c6cb}.ca-toolbar .tb.del-btn.da-a{background:var(--dg);color:#fff;border-color:var(--dg)}.ca-toolbar .sep{width:1px;height:22px;background:var(--bd);margin:0 4px}.tool-hint{display:block;font-size:12px;color:#6a4c93;font-weight:600;margin:2px 0 0 4px;width:100%}
+.ca-toolbar{display:flex;align-items:center;gap:4px;padding:7px 10px;background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;z-index:10}
+.ca-toolbar .tb{padding:6px 11px;border:1px solid var(--bd);border-radius:5px;background:#fff;color:var(--tx);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;transition:all .1s;white-space:nowrap}.ca-toolbar .tb:hover{background:var(--sf2)}.ca-toolbar .tb.active{background:var(--tx);color:#fff;border-color:var(--tx)}.ca-toolbar .tb.magic{background:linear-gradient(135deg,#e8d5f5,#d5e8f5);border-color:#b8a0d0;color:#6a4c93;font-weight:800}.ca-toolbar .tb.magic:hover{background:linear-gradient(135deg,#dcc5ef,#c5ddf0)}.ca-toolbar .tb.del-btn{color:var(--dg);border-color:#f5c6cb}.ca-toolbar .tb.del-btn.da-a{background:var(--dg);color:#fff;border-color:var(--dg)}.ca-toolbar .sep{width:1px;height:22px;background:var(--bd);margin:0 4px}.tool-hint{display:block;font-size:12px;color:#6a4c93;font-weight:600;margin:2px 0 0 4px;width:100%}
 .ca-toolbar2{display:flex;align-items:center;gap:4px;padding:6px 10px;background:#fafafa;border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;z-index:9}.ca-toolbar2 .tb{padding:5px 9px;border:1px solid var(--bd);border-radius:4px;background:#fff;color:var(--tx);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;white-space:nowrap}.ca-toolbar2 .tb:hover{background:var(--sf2)}.ca-toolbar2 .tb.active{background:var(--tx);color:#fff;border-color:var(--tx)}.ca-toolbar2 .lbl{font-size:13px;color:var(--tx);font-weight:800;margin-right:6px}
-.ca-toolbar3{display:flex;align-items:center;gap:4px;padding:6px 10px;background:#fef9f5;border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;z-index:8}.ca-toolbar3 .tb{padding:5px 9px;border:1px solid #e8d0b8;border-radius:4px;background:#fff;color:#cf9468;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;white-space:nowrap;transition:all .1s}.ca-toolbar3 .tb:hover{background:#fdf2e9}.ca-toolbar3 .tb.active{background:#cf9468;color:#fff;border-color:#cf9468}.ca-toolbar3 .lbl{font-size:13px;color:#cf9468;font-weight:800;margin-right:6px}
-.ca-toolbar3 .tb .ic.zzig svg {width:16px;height:10px}
-.ca-canvas{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.a4{width:1587px;height:1122px;background:#fff;box-shadow:0 2px 24px rgba(0,0,0,.12);position:relative;overflow:hidden;transform-origin:center center}.cinr{position:absolute;inset:0;padding:40px 60px}.lsvg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.ca-toolbar3{display:flex;align-items:center;gap:4px;padding:6px 10px;background:#fef9f5;border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;z-index:8}.ca-toolbar3 .tb{padding:5px 9px;border:1px solid #e8d0b8;border-radius:4px;background:#fff;color:#cf9468;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--ft);display:flex;align-items:center;gap:3px;white-space:nowrap}.ca-toolbar3 .tb:hover{background:#fdf2e9}.ca-toolbar3 .tb.active{background:#cf9468;color:#fff;border-color:#cf9468}.ca-toolbar3 .lbl{font-size:13px;color:#cf9468;font-weight:800;margin-right:6px}
+.tb .ic-dbl{display:inline-flex;width:16px;height:12px;flex-direction:column;justify-content:center;gap:3px;margin-right:2px}.tb .ic-dbl span{display:block;width:100%;height:2px;background:currentColor}
+.tb .ic-tpl{display:inline-flex;width:16px;height:14px;flex-direction:column;justify-content:center;gap:2px;margin-right:2px}.tb .ic-tpl span{display:block;width:100%;height:2px;background:currentColor}
+.ca-canvas{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.a4{width:1587px;height:1122px;background:#fff;box-shadow:0 2px 24px rgba(0,0,0,.12);position:relative;overflow:hidden;transform-origin:center center}.cinr{position:absolute;inset:0;padding:40px 60px}.lsvg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
 .cl{stroke:var(--ln);stroke-width:2.2;fill:none}.clp{stroke:var(--ln);stroke-width:2.2;fill:none}.tl{stroke:#999;stroke-width:1.5;stroke-dasharray:6 4;fill:none;opacity:.6}
 .sel-rect{position:absolute;border:1.5px dashed rgba(0,90,200,.4);background:rgba(0,90,200,.06);z-index:10;pointer-events:none}
-.node{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;cursor:ew-resize;user-select:none}.node.free-node{cursor:grab}.node.dragging{z-index:999!important}.node.selected .ns{border-width:3px;box-shadow:0 0 0 4px rgba(0,90,200,.15)}.node.multi-sel .ns{box-shadow:0 0 0 4px rgba(0,90,200,.25)}.node.is-me .ns{border-width:3px}.node.couple-sel .ns{box-shadow:0 0 0 5px var(--couple-glow);border-color:var(--couple-border)}
-.ns{width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#fff;border:2.2px solid var(--ln);position:relative}.node.male .ns{border-radius:0}.node.female .ns{border-radius:50%}.node.deceased-male .ns{border-radius:0}.node.deceased-female .ns{border-radius:50%}.node.deceased-male .ns::before,.node.deceased-male .ns::after,.node.deceased-female .ns::before,.node.deceased-female .ns::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:2.2px;background:var(--ln);pointer-events:none;z-index:3}.node.deceased-male .ns::before,.node.deceased-female .ns::before{transform:translate(-50%,-50%) rotate(45deg)}.node.deceased-male .ns::after,.node.deceased-female .ns::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.node{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;cursor:ew-resize;user-select:none}.node.free-node{cursor:grab}.node.dragging{z-index:999!important}.node.selected .ns{border-width:3px;box-shadow:0 0 0 4px rgba(0,90,200,.15)}.node.multi-sel .ns{box-shadow:0 0 0 4px rgba(0,90,200,.25)}.node.couple-sel .ns{box-shadow:0 0 0 5px var(--couple-glow);border-color:var(--couple-border)}
+.node.is-me .ns{border-width:3px;box-shadow:inset 0 0 0 4px #fff, inset 0 0 0 6.5px var(--ln)}
+.ns{width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#fff;border:2.2px solid var(--ln);position:relative}.node.male .ns{border-radius:0}.node.female .ns{border-radius:50%}.node.deceased-male .ns{border-radius:0}.node.deceased-female .ns{border-radius:50%}
+.node.deceased-male .ns::before,.node.deceased-male .ns::after,.node.deceased-female .ns::before,.node.deceased-female .ns::after{content:'';position:absolute;top:50%;left:50%;width:130%;height:2.2px;background:var(--ln);pointer-events:none;z-index:3}.node.deceased-male .ns::before,.node.deceased-female .ns::before{transform:translate(-50%,-50%) rotate(45deg)}.node.deceased-male .ns::after,.node.deceased-female .ns::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .node.pregnant .ns{border:none;background:transparent}.node.pregnant .ns::before{content:'';position:absolute;top:5px;left:10px;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:36px solid var(--ln)}.node.pregnant .ns::after{content:'';position:absolute;top:8px;left:13px;border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:30px solid #fff}
+.node.miscarriage .ns{width:60px;height:60px;border:none;background:transparent}
+.node.miscarriage .ns::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:var(--ln)}
+.node.abortion .ns{width:60px;height:60px;border:none;background:transparent}
+.node.abortion .ns::before,.node.abortion .ns::after{content:'';position:absolute;top:50%;left:50%;width:30px;height:3px;background:var(--ln);pointer-events:none}
+.node.abortion .ns::before{transform:translate(-50%,-50%) rotate(45deg)}
+.node.abortion .ns::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .ns .age-num{font-size:13px;font-weight:800;color:var(--tx);z-index:4;pointer-events:none}
 .port{position:absolute;width:16px;height:16px;border-radius:50%;background:transparent;cursor:crosshair;opacity:0;z-index:5}.node:hover .port,.ca.connecting .port{opacity:1;background:rgba(0,0,0,.08)}.port:hover{background:rgba(0,0,0,.2)!important}.port.top{top:-8px;left:50%;margin-left:-8px}.port.bottom{bottom:-8px;left:50%;margin-left:-8px}.port.left{left:-8px;top:50%;margin-top:-8px}.port.right{right:-8px;top:50%;margin-top:-8px}
 .nn{margin-top:5px;padding:2px 6px;border-radius:3px;font-size:12px;font-weight:700;color:var(--tx);background:transparent;border:1px solid transparent;min-width:20px;text-align:center;outline:none;cursor:text;white-space:nowrap}.nn:focus{border-color:var(--bd);background:#fff}
+.birth-lbl,.death-lbl{position:absolute;top:-22px;font-size:18px;font-weight:600;color:var(--ln);white-space:nowrap;pointer-events:none;z-index:6}
+.birth-lbl{right:calc(100% + 2px);text-align:right}
+.death-lbl{left:calc(100% + 2px);text-align:left}
 .zc{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;z-index:50;border-radius:6px;overflow:hidden;border:1px solid var(--bd)}.zb{width:34px;height:32px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:17px;cursor:pointer}.zb:last-child{border-bottom:none}.zb:hover{background:var(--sf2)}.zlb{font-size:10px;font-weight:600;text-align:center;padding:3px 0;color:var(--txd);background:#fff;border-bottom:1px solid var(--bd)}
 .ctx{position:fixed;z-index:200;background:#fff;border:1px solid var(--bd);border-radius:6px;padding:4px;min-width:140px;box-shadow:0 4px 18px rgba(0,0,0,.15);display:none}.ctx.show{display:block}.ci-i{padding:7px 11px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}.ci-i:hover{background:var(--sf2)}.ci-i.danger{color:var(--dg)}.csep{height:1px;background:var(--bd);margin:3px 6px}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--tx);color:#fff;border-radius:6px;padding:9px 22px;font-size:13px;font-weight:600;z-index:300;transition:transform .25s ease;pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0)}
@@ -40,388 +79,166 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--ft);backgroun
 </style>
 </head>
 <body>
-<div class="lp"><div class="lp-hd"><h1>가계도 그리기</h1><button class="help-btn" onclick="showTutorial()">? 도움말</button><div class="contact">문의: 32robin@naver.com</div></div><div class="lp-sc">
+<div class="lp"><div class="lp-hd"><h1>가계도 그리기</h1><button class="help-btn" onclick="showTutorial()">? 도움말</button><div class="contact">문의: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="380b0a4a575a51567856594e5d4a165b5755">[email&#160;protected]</a></div></div><div class="lp-sc">
 <div class="sec s-me"><h3>나 (본인)</h3><div class="me-box"><div class="ml">본인 성별</div><div class="gr"><button class="gb sel" id="gM" onclick="setMyG('male')">남성 ■</button><button class="gb" id="gF" onclick="setMyG('female')">여성 ●</button></div></div></div>
 <div class="sec s-sel"><h3>클릭하여 구성원 선택</h3><div class="sel-info" id="selInfo">구성원을 클릭하세요</div><div class="br" style="margin-top:8px"><button class="b" onclick="addParents()"><span class="ic nb">+</span>부모님 추가</button><button class="b" onclick="addSpouse('male')"><span class="ic"></span>남성 배우자</button><button class="b" onclick="addSpouse('female')"><span class="ic ci"></span>여성 배우자</button></div></div>
-<div class="sec s-couple"><h3>선택된 부부</h3><div class="sel-info" id="coupleInfo">구성원을 <b>더블클릭</b>하여 부부 선택</div><div class="br" style="margin-top:8px"><button class="b" onclick="addChild('male')"><span class="ic"></span>아들</button><button class="b" onclick="addChild('female')"><span class="ic ci"></span>딸</button><button class="b" onclick="addChild('pregnant')"><span class="ic tri"></span>임신 중</button><button class="b" onclick="showDD('ddTwin',event)"><span class="ic nb">⋔</span>쌍둥이 ▾</button></div></div>
+<div class="sec s-couple"><h3>선택된 부부</h3><div class="sel-info" id="coupleInfo">구성원을 <b>더블클릭</b>하여 부부 선택</div><div class="br" style="margin-top:8px">
+<button class="b" onclick="addChild('male')"><span class="ic"></span>아들</button>
+<button class="b" onclick="addChild('female')"><span class="ic ci"></span>딸</button>
+<button class="b" onclick="addChild('pregnant')"><span class="ic tri"></span>임신 중</button>
+<button class="b" onclick="showDD('ddTwin',event)"><span class="ic nb">⋔</span>쌍둥이 ▾</button>
+<div class="hint-txt">일란성 쌍둥이의 경우 '일반 관계선'을 직접 이어 표시해주세요.</div>
+<button class="b" onclick="showDD('ddLoss',event)"><span class="ic mc-icon"></span>유산 ▾</button>
+</div></div>
 <div class="sec s-sib"><h3>형제자매</h3><div class="br"><button class="b" onclick="addSib('male','형/오빠')"><span class="ic"></span>형/오빠</button><button class="b" onclick="addSib('female','언니/누나')"><span class="ic ci"></span>언니/누나</button><button class="b" onclick="addSib('male','남동생')"><span class="ic"></span>남동생</button><button class="b" onclick="addSib('female','여동생')"><span class="ic ci"></span>여동생</button></div></div>
-<div class="sec s-add"><h3>구성원 직접 추가</h3><div class="br"><button class="b" onclick="addFree('male')"><span class="ic"></span>남성</button><button class="b" onclick="addFree('female')"><span class="ic ci"></span>여성</button><button class="b" onclick="showDD('ddDec',event)"><span class="ic xi"></span>고인 ▾</button></div></div>
+<div class="sec s-add"><h3>구성원 직접 추가</h3><div class="br"><button class="b" onclick="addFree('male')"><span class="ic"></span>남성</button><button class="b" onclick="addFree('female')"><span class="ic ci"></span>여성</button></div></div>
 </div><div class="lp-ft"><kbd>Ctrl+Z</kbd> 되돌리기 <kbd>Ctrl+Shift+Z</kbd> 취소<br>마우스 오른쪽 클릭 or <kbd>Delete</kbd>: 삭제</div></div>
 <div class="mp"><div class="mp-hd">구성원 정보</div><div class="mp-sc" id="mpSc"></div></div>
 <div class="ca" id="caEl">
-<div class="ca-toolbar"><button class="tb" id="undoBtn" onclick="doUndo()" disabled>↶ 되돌리기</button><button class="tb" id="redoBtn" onclick="doRedo()" disabled>↷ 되돌리기 취소</button><div class="sep"></div><button class="tb" id="btnGT" onclick="tg('genderToggle')">⇄ 성별전환</button><button class="tb" id="btnDT" onclick="tg('decToggle')">✝ 고인전환</button><button class="tb del-btn" id="btnDel" onclick="tg('delete')">✕ 삭제</button><div class="sep"></div><button class="tb" id="btnConn" onclick="tg('connect')">↕ 부모자녀</button><button class="tb" id="btnSpo" onclick="tg('spouse')">─ 배우자</button><div class="sep"></div><button class="tb" onclick="centerAll()">⊞ 중앙</button><button class="tb magic" onclick="magicFix()">✨ 자동정렬</button><button class="tb" onclick="clearAll()">↺ 초기화</button><div class="sep"></div><button class="tb" onclick="downloadJPG()">⬇ JPG</button><div class="tool-hint">▲ 도구 버튼 클릭 → 구성원 클릭으로 속성 변경</div></div>
-<div class="ca-toolbar2"><span class="lbl">관계선 생성 ▶</span><button class="tb" id="rlNorm" onclick="tg('relNorm')">― 일반</button><button class="tb" id="rlClose" onclick="tg('relClose')">═ 친밀</button><button class="tb" id="rlDist" onclick="tg('relDist')">┄ 소원</button><button class="tb" id="rlCut" onclick="tg('relCut')">╫ 단절</button><button class="tb" id="rlConf" onclick="tg('relConf')">〰 갈등</button><button class="tb" id="rlDiv" onclick="tg('relDiv')">⫽ 이혼</button><button class="tb" id="rlSep" onclick="tg('relSep')">⁄ 별거</button></div>
-<div class="ca-toolbar3"><span class="lbl">관계선 변경 ▶</span><button class="tb" id="lnN" onclick="tg('lnNorm')">― 일반</button><button class="tb" id="lnC" onclick="tg('lnClose')">═ 친밀</button><button class="tb" id="lnD" onclick="tg('lnDist')">┄ 소원</button><button class="tb" id="lnX" onclick="tg('lnCut')">╫ 단절</button><button class="tb" id="lnF" onclick="tg('lnConf')">〰 갈등</button><button class="tb" id="lnDv" onclick="tg('lnDiv')">⫽ 이혼</button><button class="tb" id="lnSp" onclick="tg('lnSep')">⁄ 별거</button></div>
+<div class="ca-toolbar"><button class="tb" id="undoBtn" onclick="doUndo()" disabled>↶ 되돌리기</button><button class="tb" id="redoBtn" onclick="doRedo()" disabled>↷ 되돌리기 취소</button><div class="sep"></div><button class="tb" id="btnGT" onclick="tg('genderToggle')">⇄ 성별전환</button><button class="tb" id="btnDT" onclick="tg('decToggle')">✕ 고인전환</button><button class="tb del-btn" id="btnDel" onclick="tg('delete')">✕ 삭제</button><div class="sep"></div><button class="tb" id="btnConn" onclick="tg('connect')">↕ 부모자녀</button><button class="tb" id="btnSpo" onclick="tg('spouse')">─ 배우자</button><div class="sep"></div><button class="tb" onclick="centerAll()">⊞ 중앙</button><button class="tb magic" onclick="magicFix()">✨ 자동정렬</button><button class="tb" onclick="clearAll()">↺ 초기화</button><div class="sep"></div>
+<button class="tb" onclick="downloadJPG()">⬇ JPG</button>
+<button class="tb" onclick="saveJSON()">💾 파일로 저장</button>
+<button class="tb" onclick="document.getElementById('fileInput').click()">📂 파일 불러오기</button>
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+<div class="tool-hint">▲ 도구 버튼 클릭 → 구성원 클릭으로 속성 변경</div></div>
+<div class="ca-toolbar2"><span class="lbl">관계선 생성 ▶</span><button class="tb" id="rlNorm" onclick="tg('relNorm')">― 일반</button><button class="tb" id="rlClose" onclick="tg('relClose')"><span class="ic-dbl"><span></span><span></span></span>친밀</button><button class="tb" id="rlFused" onclick="tg('relFused')"><span class="ic-tpl"><span></span><span></span><span></span></span>밀착</button><button class="tb" id="rlDist" onclick="tg('relDist')">┄ 소원</button><button class="tb" id="rlCut" onclick="tg('relCut')">╫ 단절</button><button class="tb" id="rlConf" onclick="tg('relConf')">〰 갈등</button><button class="tb" id="rlDiv" onclick="tg('relDiv')">⫽ 이혼</button><button class="tb" id="rlSep" onclick="tg('relSep')">⁄ 별거</button></div>
+<div class="ca-toolbar3"><span class="lbl">관계선 변경 ▶</span><button class="tb" id="lnN" onclick="tg('lnNorm')">― 일반</button><button class="tb" id="lnC" onclick="tg('lnClose')"><span class="ic-dbl"><span></span><span></span></span>친밀</button><button class="tb" id="lnFu" onclick="tg('lnFused')"><span class="ic-tpl"><span></span><span></span><span></span></span>밀착</button><button class="tb" id="lnD" onclick="tg('lnDist')">┄ 소원</button><button class="tb" id="lnX" onclick="tg('lnCut')">╫ 단절</button><button class="tb" id="lnF" onclick="tg('lnConf')">〰 갈등</button><button class="tb" id="lnDv" onclick="tg('lnDiv')">⫽ 이혼</button><button class="tb" id="lnSp" onclick="tg('lnSep')">⁄ 별거</button></div>
 <div class="ca-canvas" id="caCanvas"><div class="a4" id="a4"><div class="cinr" id="cinr"><svg class="lsvg" id="lsvg"></svg></div></div></div>
 </div>
 <div class="zc"><button class="zb" onclick="zI()">+</button><div class="zlb" id="zl">100%</div><button class="zb" onclick="zO()">−</button></div>
 <div class="ctx" id="ctx"><div class="ci-i" onclick="ctxA('rename')">이름 수정</div><div class="csep"></div><div class="ci-i" onclick="ctxA('toM')">남성</div><div class="ci-i" onclick="ctxA('toF')">여성</div><div class="ci-i" onclick="ctxA('toDM')">고인(남)</div><div class="ci-i" onclick="ctxA('toDF')">고인(여)</div><div class="csep"></div><div class="ci-i danger" onclick="ctxA('del')">삭제</div></div>
-<div class="dd-ov" id="ddOv" onclick="hideDD()"></div><div class="dd-mn" id="ddDec" style="display:none"><div class="dd-it" onclick="addFree('deceased-male');hideDD()">고인(남)</div><div class="dd-it" onclick="addFree('deceased-female');hideDD()">고인(여)</div></div><div class="dd-mn" id="ddTwin" style="display:none"><div class="dd-it" onclick="addTwins(2)">2명</div><div class="dd-it" onclick="addTwins(3)">3명</div><div class="dd-it" onclick="addTwins(4)">4명</div><div class="dd-it" onclick="addTwins(5)">5명</div></div>
+<div class="dd-ov" id="ddOv" onclick="hideDD()"></div>
+<div class="dd-mn" id="ddTwin" style="display:none"><div class="dd-it" onclick="addTwins(2)">2명</div><div class="dd-it" onclick="addTwins(3)">3명</div><div class="dd-it" onclick="addTwins(4)">4명</div><div class="dd-it" onclick="addTwins(5)">5명</div></div>
+<div class="dd-mn" id="ddLoss" style="display:none"><div class="dd-it" onclick="addChild('miscarriage');hideDD()">자연 유산</div><div class="dd-it" onclick="addChild('abortion');hideDD()">인공 유산</div></div>
 <div class="modal-ov" id="tutorialModal"><div class="modal"><h2>사용법</h2><div class="step"><div class="step-num">1</div><div class="step-txt"><b>"나"</b> 클릭 → <b>부모님/배우자 추가</b></div></div><div class="step"><div class="step-num">2</div><div class="step-txt">부부 <b>더블클릭</b> → <b>아들/딸 추가</b></div></div><div class="step"><div class="step-num">3</div><div class="step-txt">구성원 선택 → <b>형제자매</b> 추가</div></div><div class="step"><div class="step-num">4</div><div class="step-txt"><b>✨ 자동정렬</b>로 정리</div></div><div class="step"><div class="step-num">5</div><div class="step-txt">각 관계선 변경 버튼 클릭 → <b>가계도 내 관계선 클릭하여</b> 적용</div></div><button class="close-btn" onclick="closeTutorial()">확인</button></div></div>
 <div class="toast" id="toastEl"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const NW=60,NH=60,SG=100,GG=160,MG=50,SNAP=20,PW=1587,PH=1122,IW=PW-120,IH=PH-120;
 const cinr=document.getElementById('cinr'),lsvg=document.getElementById('lsvg'),ctxEl=document.getElementById('ctx'),a4=document.getElementById('a4'),caCanvas=document.getElementById('caCanvas'),caEl=document.getElementById('caEl');
 let $=[],C=[],TG=[],nid=1,scale=1,mode='select',connFrom=null,tmpLine=null,selNode=null,selCouple=null,ctxTgt=null,drag=null,dox=0,doy=0,dragFree=false,meNode=null,meGender='male',undoStack=[],redoStack=[],multiSel=new Set(),msDrag=false,msX=0,msY=0,selRectEl=null,multiDragStart=null,pendingCouple=null;
-const relSt={relNorm:'normal',relClose:'close',relDist:'distant',relCut:'cutoff',relConf:'conflict',relDiv:'divorce',relSep:'separation'};
+const relSt={relNorm:'normal',relClose:'close',relFused:'fused',relDist:'distant',relCut:'cutoff',relConf:'conflict',relDiv:'divorce',relSep:'separation'};
 function gn(id){return id!=null?$.find(n=>n.id===id):null}
 function isFem(t){return t==='female'||t==='deceased-female'}
 function baseG(t){return isFem(t)?'female':'male'}
 function getAllSp(i){return C.filter(c=>c.type==='spouse'&&(c.from===i||c.to===i)).map(c=>gn(c.from===i?c.to:c.from)).filter(Boolean)}
-function getFirstSp(i){const s=getAllSp(i);return s.length?s[0]:null}
+function getFirstSp(i){return getAllSp(i)[0]||null}
 function getP(i){return C.filter(c=>c.type==='parent'&&c.to===i).map(c=>gn(c.from)).filter(Boolean)}
 function getCh(i){return C.filter(c=>c.type==='parent'&&c.from===i).map(c=>gn(c.to)).filter(Boolean)}
 function chOf(a,b){const x=C.filter(c=>c.type==='parent'&&c.from===a).map(c=>c.to),y=C.filter(c=>c.type==='parent'&&c.from===b).map(c=>c.to);return x.filter(i=>y.includes(i))}
 function hasP(i){return C.some(c=>c.type==='parent'&&c.to===i)}
 function cEx(a,b,t){return C.some(c=>c.type===t&&((c.from===a&&c.to===b)||(c.from===b&&c.to===a)))}
 function isConn(i){return C.some(c=>c.from===i||c.to===i)}
-
-function getSnapshot(){return JSON.stringify({n:$.map(n=>({id:n.id,type:n.type,name:n.name,age:n.age||'',gen:n.gen,isMe:n.isMe,x:n.x,y:n.y,free:!!n.free})),c:C.map(c=>({...c})),t:TG.map(t=>[...t]),nid})}
-function applySnapshot(j){const d=JSON.parse(j);$.forEach(n=>n.el&&n.el.remove());$=[];C=d.c;TG=d.t||[];nid=d.nid;d.n.forEach(nd=>{const n=mkN(nd.type,nd.x,nd.y,nd.name,nd.isMe,nd.gen,nd.free);n.id=nd.id;n.age=nd.age||'';n.el.dataset.id=nd.id;updAge(n);$.push(n)});meNode=$.find(n=>n.isMe)||null;selNode=null;selCouple=null;multiSel.clear();pendingCouple=null;renderAll();updUI()}
+function getSnapshot(){return JSON.stringify({n:$.map(n=>({id:n.id,type:n.type,name:n.name,age:n.age||'',birth:n.birth||'',death:n.death||'',gen:n.gen,isMe:n.isMe,x:n.x,y:n.y,free:!!n.free})),c:C.map(c=>({...c})),t:TG.map(t=>[...t]),nid})}
+function applySnapshot(j){const d=JSON.parse(j);$.forEach(n=>n.el&&n.el.remove());$=[];C=d.c;TG=d.t||[];nid=d.nid;d.n.forEach(nd=>{const n=mkN(nd.type,nd.x,nd.y,nd.name,nd.isMe,nd.gen,nd.free);n.id=nd.id;n.age=nd.age||'';n.birth=nd.birth||'';n.death=nd.death||'';n.el.dataset.id=nd.id;updAge(n);updBD(n);$.push(n)});meNode=$.find(n=>n.isMe)||null;selNode=null;selCouple=null;multiSel.clear();pendingCouple=null;renderAll();updUI()}
 function pushUndo(){undoStack.push(getSnapshot());if(undoStack.length>80)undoStack.shift();redoStack=[];updUI()}
 function doUndo(){if(!undoStack.length)return;redoStack.push(getSnapshot());applySnapshot(undoStack.pop());toast('되돌리기');updUI()}
 function doRedo(){if(!redoStack.length)return;undoStack.push(getSnapshot());applySnapshot(redoStack.pop());toast('되돌리기 취소');updUI()}
 function updUI(){document.getElementById('undoBtn').disabled=!undoStack.length;document.getElementById('redoBtn').disabled=!redoStack.length}
+
+function saveJSON() {
+    const dataStr = getSnapshot();
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const lnk = document.createElement('a');
+    lnk.download = '가계도.json';
+    lnk.href = url;
+    lnk.click();
+    URL.revokeObjectURL(url);
+    toast('저장 완료');
+}
+
+function loadJSON(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            pushUndo();
+            applySnapshot(evt.target.result);
+            toast('불러오기 완료');
+        } catch (err) {
+            toast('잘못된 파일입니다');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; 
+}
+
 function uz(){a4.style.transform=`scale(${scale})`;document.getElementById('zl').textContent=Math.round(scale*100)+'%'}
 function zI(){scale=Math.min(1.5,scale+.1);uz()}
 function zO(){scale=Math.max(.15,scale-.1);uz()}
 caCanvas.addEventListener('wheel',e=>{e.preventDefault();scale=Math.max(.15,Math.min(1.5,scale+(e.deltaY>0?-.06:.06)));uz()},{passive:false});
-
 function alg(el,conn){const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.style.cursor='pointer';const hb=el.cloneNode();hb.setAttribute('stroke','transparent');hb.setAttribute('stroke-width','24');hb.setAttribute('class','');hb.setAttribute('fill','none');hb.setAttribute('stroke-dasharray','none');hb.style.pointerEvents='stroke';el.style.pointerEvents='none';el.setAttribute('fill','none');g.appendChild(hb);g.appendChild(el);g.addEventListener('mouseenter',()=>el.style.stroke='red');g.addEventListener('mouseleave',()=>el.style.stroke='');if(conn){g.addEventListener('click',e=>{e.stopPropagation();onLC(conn)});g.addEventListener('contextmenu',e=>{e.preventDefault();pushUndo();rmC(conn)})}lsvg.appendChild(g)}
-function renderLines(){
-  lsvg.innerHTML='';const drn=new Set();const aTw=new Set();TG.forEach(t=>t.forEach(id=>aTw.add(id)));
-  let fIdx = 0; 
-  C.filter(c=>c.type==='spouse').forEach(cn=>{
-    fIdx++;
-    const n1=gn(cn.from),n2=gn(cn.to);if(!n1||!n2)return;
-    const lt=n1.x<n2.x?n1:n2,rt=n1.x<n2.x?n2:n1;
-    const y=Math.min(lt.y,rt.y)+NH/2;
-    drawRL(lt.x+NW,y,rt.x,y,cn);
-    const kids=chOf(cn.from,cn.to);if(!kids.length)return;
-    const cns=kids.map(id=>gn(id)).filter(Boolean);if(!cns.length)return;
-    const mx=(lt.x+NW+rt.x)/2,my=y;
-    const dy=my+GG/2 + (fIdx % 3)*7; 
-    const kSet=new Set(kids);const tgH=TG.filter(t=>t.some(id=>kSet.has(id)));
-    const uTw=new Set();tgH.forEach(t=>t.forEach(id=>uTw.add(id)));
-    const ntk=cns.filter(c=>!uTw.has(c.id));
-    const allCx=[...ntk.map(c=>c.x+NW/2)];
-    tgH.forEach(t=>{
-      const tns=t.map(id=>gn(id)).filter(Boolean);
-      if(tns.length){
-        const txs=tns.map(n=>n.x+NW/2);
-        allCx.push((Math.min(...txs)+Math.max(...txs))/2);
-      }
-    });
-    if(!allCx.length)return;allCx.sort((a,b)=>a-b);
-    aL(mx,my,mx,dy,'cl');
-    const bL=Math.min(mx,...allCx),bR=Math.max(mx,...allCx);
-    if(bL<bR)aL(bL,dy,bR,dy,'cl');
-    ntk.forEach(c=>{aL(c.x+NW/2,dy,c.x+NW/2,c.y,'cl');drn.add(c.id)});
-    tgH.forEach(t=>{
-      const tns=t.map(id=>gn(id)).filter(Boolean);
-      if(tns.length<2)return;
-      const txs=tns.map(n=>n.x+NW/2).sort((a,b)=>a-b);
-      const midTx=(txs[0]+txs[txs.length-1])/2;
-      const convY=dy+(tns[0].y-dy)*.4;
-      aL(midTx,dy,midTx,convY,'cl');
-      tns.forEach(tn=>{aL(midTx,convY,tn.x+NW/2,tn.y,'cl');drn.add(tn.id)});
-    });
-    kids.forEach(id=>drn.add(id));
-  });
-  C.filter(c=>c.type==='parent').forEach(cn=>{
-    if(drn.has(cn.to))return;
-    const p=gn(cn.from),ch=gn(cn.to);if(!p||!ch)return;
-    const p1={x:p.x+NW/2,y:p.y+NH},p2={x:ch.x+NW/2,y:ch.y};
-    const my=(p1.y+p2.y)/2;
-    aL(p1.x,p1.y,p1.x,my,'cl',cn);aL(p1.x,my,p2.x,my,'cl',cn);aL(p2.x,my,p2.x,p2.y,'cl',cn);
-  });
-  C.filter(c=>c.type==='relation').forEach(cn=>{
-    const n1=gn(cn.from),n2=gn(cn.to);if(!n1||!n2)return;
-    drawRL(n1.x+NW/2,n1.y+NH/2,n2.x+NW/2,n2.y+NH/2,cn);
-  });
-}
-function drawRL(x1,y1,x2,y2,cn){const rs=cn.relStyle||'normal';const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;const ux=dx/len,uy=dy/len,px=-uy,py=ux;
-if(rs==='close'){aL(x1+px*4,y1+py*4,x2+px*4,y2+py*4,'cl',cn);aL(x1-px*4,y1-py*4,x2-px*4,y2-py*4,'cl',cn)}
-else if(rs==='distant'){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class','cl');l.setAttribute('stroke-dasharray','6 4');alg(l,cn)}
-else if(rs==='cutoff'){const mx=(x1+x2)/2,my=(y1+y2)/2,g=10,b=9;aL(x1,y1,mx-ux*g,my-uy*g,'cl',cn);aL(mx+ux*g,my+uy*g,x2,y2,'cl',cn);aL(mx-ux*g+px*b,my-uy*g+py*b,mx-ux*g-px*b,my-uy*g-py*b,'cl');aL(mx+ux*g+px*b,my+uy*g+py*b,mx+ux*g-px*b,my+uy*g-py*b,'cl')}
-else if(rs==='conflict'){const p=document.createElementNS('http://www.w3.org/2000/svg','path');const amp=8,iS=14;let segs=Math.max(1,Math.floor(len/iS)-1);const sL=len/(segs+1);let d=`M${x1},${y1}`;for(let i=0;i<=segs;i++){const dist=sL/2+i*sL;d+=` L${x1+ux*dist+px*amp*((i%2===0)?1:-1)},${y1+uy*dist+py*amp*((i%2===0)?1:-1)}`}d+=` L${x2},${y2}`;p.setAttribute('d',d);p.setAttribute('class','clp');alg(p,cn)}
-else if(rs==='divorce'){aL(x1,y1,x2,y2,'cl',cn);const mx=(x1+x2)/2,my=(y1+y2)/2,s=9;aL(mx-5*ux-s*px*.5+s*ux*.5,my-5*uy-s*py*.5+s*uy*.5,mx-5*ux+s*px*.5-s*ux*.5,my-5*uy+s*py*.5-s*uy*.5,'cl');aL(mx+5*ux-s*px*.5+s*ux*.5,my+5*uy-s*py*.5+s*uy*.5,mx+5*ux+s*px*.5-s*ux*.5,my+5*uy+s*py*.5-s*uy*.5,'cl')}
-else if(rs==='separation'){aL(x1,y1,x2,y2,'cl',cn);const mx=(x1+x2)/2,my=(y1+y2)/2,s=9;aL(mx-s*px*.5+s*ux*.5,my-s*py*.5+s*uy*.5,mx+s*px*.5-s*ux*.5,my+s*py*.5-s*uy*.5,'cl')}
-else aL(x1,y1,x2,y2,'cl',cn)}
-function onLC(cn){if(mode==='delete'){pushUndo();rmC(cn)}else if(mode.startsWith('ln')){pushUndo();cn.relStyle={lnNorm:'normal',lnClose:'close',lnDist:'distant',lnCut:'cutoff',lnConf:'conflict',lnDiv:'divorce',lnSep:'separation'}[mode]||'normal';renderLines();toast({normal:'일반',close:'친밀',distant:'소원',cutoff:'단절',conflict:'갈등',divorce:'이혼',separation:'별거'}[cn.relStyle])}else if(cn.type==='spouse'&&mode==='connect'){pendingCouple={a:cn.from,b:cn.to};toast('자녀 클릭')}else if(cn.type==='spouse')selectCouple(cn.from,cn.to)}
+function renderLines(){lsvg.innerHTML='';const drn=new Set();const aTw=new Set();TG.forEach(t=>t.forEach(id=>aTw.add(id)));let fIdx=0;C.filter(c=>c.type==='spouse').forEach(cn=>{fIdx++;const n1=gn(cn.from),n2=gn(cn.to);if(!n1||!n2)return;const lt=n1.x<n2.x?n1:n2,rt=n1.x<n2.x?n2:n1;const y=Math.min(lt.y,rt.y)+NH/2;drawRL(lt.x+NW,y,rt.x,y,cn);const kids=chOf(cn.from,cn.to);if(!kids.length)return;const cns=kids.map(id=>gn(id)).filter(Boolean);if(!cns.length)return;const mx=(lt.x+NW+rt.x)/2,my=y;const dy=my+GG/2+(fIdx%3)*7;const kSet=new Set(kids);const tgH=TG.filter(t=>t.some(id=>kSet.has(id)));const uTw=new Set();tgH.forEach(t=>t.forEach(id=>uTw.add(id)));const ntk=cns.filter(c=>!uTw.has(c.id));const allCx=[...ntk.map(c=>c.x+NW/2)];tgH.forEach(t=>{const tns=t.map(id=>gn(id)).filter(Boolean);if(tns.length){const txs=tns.map(n=>n.x+NW/2);allCx.push((Math.min(...txs)+Math.max(...txs))/2)}});if(!allCx.length)return;allCx.sort((a,b)=>a-b);aL(mx,my,mx,dy,'cl');const bL=Math.min(mx,...allCx),bR=Math.max(mx,...allCx);if(bL<bR)aL(bL,dy,bR,dy,'cl');ntk.forEach(c=>{aL(c.x+NW/2,dy,c.x+NW/2,c.y,'cl');drn.add(c.id)});tgH.forEach(t=>{const tns=t.map(id=>gn(id)).filter(Boolean);if(tns.length<2)return;const txs=tns.map(n=>n.x+NW/2).sort((a,b)=>a-b);const midTx=(txs[0]+txs[txs.length-1])/2;const convY=dy+(tns[0].y-dy)*.4;aL(midTx,dy,midTx,convY,'cl');tns.forEach(tn=>{aL(midTx,convY,tn.x+NW/2,tn.y,'cl');drn.add(tn.id)})});kids.forEach(id=>drn.add(id))});C.filter(c=>c.type==='parent').forEach(cn=>{if(drn.has(cn.to))return;const p=gn(cn.from),ch=gn(cn.to);if(!p||!ch)return;const p1={x:p.x+NW/2,y:p.y+NH},p2={x:ch.x+NW/2,y:ch.y};const my=(p1.y+p2.y)/2;aL(p1.x,p1.y,p1.x,my,'cl',cn);aL(p1.x,my,p2.x,my,'cl',cn);aL(p2.x,my,p2.x,p2.y,'cl',cn)});C.filter(c=>c.type==='relation').forEach(cn=>{const n1=gn(cn.from),n2=gn(cn.to);if(!n1||!n2)return;drawRL(n1.x+NW/2,n1.y+NH/2,n2.x+NW/2,n2.y+NH/2,cn)})}
+function drawRL(x1,y1,x2,y2,cn){const rs=cn.relStyle||'normal';const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;const ux=dx/len,uy=dy/len,px=-uy,py=ux;if(rs==='close'){aL(x1+px*4,y1+py*4,x2+px*4,y2+py*4,'cl',cn);aL(x1-px*4,y1-py*4,x2-px*4,y2-py*4,'cl',cn)}else if(rs==='fused'){aL(x1,y1,x2,y2,'cl',cn);aL(x1+px*5,y1+py*5,x2+px*5,y2+py*5,'cl',cn);aL(x1-px*5,y1-py*5,x2-px*5,y2-py*5,'cl',cn)}else if(rs==='distant'){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class','cl');l.setAttribute('stroke-dasharray','6 4');alg(l,cn)}else if(rs==='cutoff'){const mx2=(x1+x2)/2,my2=(y1+y2)/2,g=10,b=9;aL(x1,y1,mx2-ux*g,my2-uy*g,'cl',cn);aL(mx2+ux*g,my2+uy*g,x2,y2,'cl',cn);aL(mx2-ux*g+px*b,my2-uy*g+py*b,mx2-ux*g-px*b,my2-uy*g-py*b,'cl');aL(mx2+ux*g+px*b,my2+uy*g+py*b,mx2+ux*g-px*b,my2+uy*g-py*b,'cl')}else if(rs==='conflict'){const p=document.createElementNS('http://www.w3.org/2000/svg','path');const amp=8,iS=14;let segs=Math.max(1,Math.floor(len/iS)-1);const sL=len/(segs+1);let d=`M${x1},${y1}`;for(let i=0;i<=segs;i++){const dist=sL/2+i*sL;d+=` L${x1+ux*dist+px*amp*((i%2===0)?1:-1)},${y1+uy*dist+py*amp*((i%2===0)?1:-1)}`}d+=` L${x2},${y2}`;p.setAttribute('d',d);p.setAttribute('class','clp');alg(p,cn)}else if(rs==='divorce'){aL(x1,y1,x2,y2,'cl',cn);const mx2=(x1+x2)/2,my2=(y1+y2)/2,s=9;aL(mx2-5*ux-s*px*.5+s*ux*.5,my2-5*uy-s*py*.5+s*uy*.5,mx2-5*ux+s*px*.5-s*ux*.5,my2-5*uy+s*py*.5-s*uy*.5,'cl');aL(mx2+5*ux-s*px*.5+s*ux*.5,my2+5*uy-s*py*.5+s*uy*.5,mx2+5*ux+s*px*.5-s*ux*.5,my2+5*uy+s*py*.5-s*uy*.5,'cl')}else if(rs==='separation'){aL(x1,y1,x2,y2,'cl',cn);const mx2=(x1+x2)/2,my2=(y1+y2)/2,s=9;aL(mx2-s*px*.5+s*ux*.5,my2-s*py*.5+s*uy*.5,mx2+s*px*.5-s*ux*.5,my2+s*py*.5-s*uy*.5,'cl')}else aL(x1,y1,x2,y2,'cl',cn)}
+function onLC(cn){if(mode==='delete'){pushUndo();rmC(cn)}else if(mode.startsWith('ln')){pushUndo();cn.relStyle={lnNorm:'normal',lnClose:'close',lnFused:'fused',lnDist:'distant',lnCut:'cutoff',lnConf:'conflict',lnDiv:'divorce',lnSep:'separation'}[mode]||'normal';renderLines();toast({normal:'일반',close:'친밀',fused:'밀착',distant:'소원',cutoff:'단절',conflict:'갈등',divorce:'이혼',separation:'별거'}[cn.relStyle])}else if(cn.type==='spouse'&&mode==='connect'){pendingCouple={a:cn.from,b:cn.to};toast('자녀 클릭')}else if(cn.type==='spouse')selectCouple(cn.from,cn.to)}
 function aL(x1,y1,x2,y2,cls,cn){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('class',cls);alg(l,cn)}
 function rmC(c){const i=C.indexOf(c);if(i>=0){C.splice(i,1);renderAll();toast('삭제')}}
-
-function mkN(type,x,y,name,isMe,gen,free){const node={id:nid++,type,name:name||'이름',age:'',gen:gen??0,isMe:!!isMe,x,y,el:null,free:!!free};const el=document.createElement('div');el.className=`node ${type}`+(isMe?' is-me':'')+(free?' free-node':'');el.style.left=x+'px';el.style.top=y+'px';el.dataset.id=node.id;el.innerHTML=`<div class="ns"><span class="age-num"></span><div class="port top"></div><div class="port bottom"></div><div class="port left"></div><div class="port right"></div></div><div class="nn" contenteditable="true">${node.name}</div>`;wireN(el,node);cinr.appendChild(el);node.el=el;return node}
+function mkN(type,x,y,name,isMe,gen,free){const node={id:nid++,type,name:name||'이름',age:'',birth:'',death:'',gen:gen??0,isMe:!!isMe,x,y,el:null,free:!!free};const el=document.createElement('div');el.className=`node ${type}`+(isMe?' is-me':'')+(free?' free-node':'');el.style.left=x+'px';el.style.top=y+'px';el.dataset.id=node.id;el.innerHTML=`<div class="ns"><span class="birth-lbl"></span><span class="death-lbl"></span><span class="age-num"></span><div class="port top"></div><div class="port bottom"></div><div class="port left"></div><div class="port right"></div></div><div class="nn" contenteditable="true">${node.name}</div>`;wireN(el,node);cinr.appendChild(el);node.el=el;return node}
 function updAge(n){const el=n.el?.querySelector('.age-num');if(el)el.textContent=n.age||''}
+function updBD(n){const bl=n.el?.querySelector('.birth-lbl'),dl=n.el?.querySelector('.death-lbl');if(bl)bl.textContent=n.birth||'';if(dl)dl.textContent=n.death||''}
 function setPos(n){if(n?.el){n.el.style.left=n.x+'px';n.el.style.top=n.y+'px'}}
 function clampN(n){n.x=Math.max(0,Math.min(IW-NW,n.x));n.y=Math.max(0,Math.min(IH-NH,n.y))}
 function wireN(el,node){const nm=el.querySelector('.nn');nm.addEventListener('mousedown',e=>e.stopPropagation());nm.addEventListener('focus',function(){if(this.textContent==='이름')this.textContent=''});nm.addEventListener('blur',function(){node.name=this.textContent||'이름';if(!this.textContent)this.textContent='이름';renderCards()});nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur()}});el.querySelectorAll('.port').forEach(port=>{port.addEventListener('mousedown',e=>{if(mode==='connect'||mode==='spouse'||mode.startsWith('rel')){e.stopPropagation();startConn(node)}});port.addEventListener('mouseup',e=>{if(connFrom&&connFrom.id!==node.id){e.stopPropagation();endConn(node)}})});el.addEventListener('dblclick',e=>{e.stopPropagation();const sp=getAllSp(node.id)[0];if(sp)selectCouple(node.id,sp.id)});el.addEventListener('mousedown',e=>{if(e.button===2)return;if(mode==='delete'){if(!node.isMe){pushUndo();delN(node.id)}else toast('삭제 불가');return}if(mode==='genderToggle'){pushUndo();togG(node);return}if(mode==='decToggle'){pushUndo();togD(node);return}if(mode.startsWith('ln'))return;if(mode==='connect'){if(pendingCouple){pushUndo();if(!cEx(pendingCouple.a,node.id,'parent'))C.push({from:pendingCouple.a,to:node.id,type:'parent',relStyle:'normal'});if(!cEx(pendingCouple.b,node.id,'parent'))C.push({from:pendingCouple.b,to:node.id,type:'parent',relStyle:'normal'});pendingCouple=null;renderAll();toast('연결');return}e.stopPropagation();startConn(node);return}if(mode==='spouse'||mode.startsWith('rel')){e.stopPropagation();startConn(node);return}e.stopPropagation();if(multiSel.has(node.id)&&multiSel.size>1){multiDragStart={x:e.clientX,y:e.clientY,pos:new Map()};multiSel.forEach(id=>{const n=gn(id);if(n)multiDragStart.pos.set(id,{x:n.x,y:n.y})});drag=node;dragFree=false;return}drag=node;dragFree=!!node.free&&!isConn(node.id);const rect=cinr.getBoundingClientRect();dox=(e.clientX-rect.left)/scale-node.x;doy=(e.clientY-rect.top)/scale-node.y;el.classList.add('dragging');if(!e.shiftKey){clearMS();selectNode(node)}else toggleMS(node.id)});el.addEventListener('mouseup',e=>{if(connFrom&&connFrom.id!==node.id&&(mode==='connect'||mode==='spouse'||mode.startsWith('rel')))endConn(node)});el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();ctxTgt=node;ctxEl.style.left=e.clientX+'px';ctxEl.style.top=e.clientY+'px';ctxEl.classList.add('show')})}
 function togG(n){if(n.type==='male')n.type='female';else if(n.type==='female')n.type='male';else if(n.type==='deceased-male')n.type='deceased-female';else if(n.type==='deceased-female')n.type='deceased-male';else return;n.el.className=`node ${n.type}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');if(n.isMe){meGender=baseG(n.type);document.getElementById('gM').classList.toggle('sel',meGender==='male');document.getElementById('gF').classList.toggle('sel',meGender==='female')}renderAll();toast('성별')}
 function togD(n){if(n.type==='male')n.type='deceased-male';else if(n.type==='female')n.type='deceased-female';else if(n.type==='deceased-male')n.type='male';else if(n.type==='deceased-female')n.type='female';else return;n.el.className=`node ${n.type}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');renderAll();toast('고인')}
-function startConn(node){connFrom=node;tmpLine=document.createElementNS('http://www.w3.org/2000/svg','line');tmpLine.setAttribute('class','tl');const c={x:node.x+NW/2,y:node.y+NH/2};tmpLine.setAttribute('x1',c.x);tmpLine.setAttribute('y1',c.y);tmpLine.setAttribute('x2',c.x);tmpLine.setAttribute('y2',c.y);lsvg.appendChild(tmpLine)}
+function startConn(node){connFrom=node;tmpLine=document.createElementNS('http://www.w3.org/2000/svg','line');tmpLine.setAttribute('class','tl');tmpLine.setAttribute('x1',node.x+NW/2);tmpLine.setAttribute('y1',node.y+NH/2);tmpLine.setAttribute('x2',node.x+NW/2);tmpLine.setAttribute('y2',node.y+NH/2);lsvg.appendChild(tmpLine)}
 function endConn(tgt){let ct='parent',rs='normal';if(mode==='spouse')ct='spouse';else if(mode.startsWith('rel')){ct='relation';rs=relSt[mode]||'normal'}if(!cEx(connFrom.id,tgt.id,ct)||(ct==='relation')){pushUndo();if(mode==='spouse'){tgt.gen=connFrom.gen;tgt.free=false;tgt.el.classList.remove('free-node')}if(mode==='connect'){tgt.free=false;tgt.el.classList.remove('free-node')}C.push({from:connFrom.id,to:tgt.id,type:ct,relStyle:rs});renderAll();toast(ct==='spouse'?'배우자':ct==='relation'?'관계선':'부모자녀')}finConn()}
 function finConn(){connFrom=null;if(tmpLine){tmpLine.remove();tmpLine=null}}
 function selectNode(node){if(selNode)selNode.el.classList.remove('selected');selNode=node;node.el.classList.add('selected');updateSI();renderCards()}
 function selectCouple(a,b){$.forEach(n=>n.el.classList.remove('couple-sel'));selCouple={a,b};gn(a)?.el.classList.add('couple-sel');gn(b)?.el.classList.add('couple-sel');updateCI()}
 function clearCS(){$.forEach(n=>n.el.classList.remove('couple-sel'));selCouple=null;updateCI()}
-function updateSI(){document.getElementById('selInfo').innerHTML=selNode?`<strong>${selNode.name}</strong> 선택됨`:'구성원을 클릭하세요'}
-function updateCI(){const el=document.getElementById('coupleInfo');if(!selCouple){el.innerHTML='구성원을 <b>더블클릭</b>하여 부부 선택';return}const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b){selCouple=null;updateCI();return}el.innerHTML=`<strong>${a.name}</strong> + <strong>${b.name}</strong> <span class="ctag">부부</span>`}
+function updateSI(){const el=document.getElementById('selInfo');if(selNode){el.innerHTML=`<strong>${selNode.name}</strong> 선택됨`;el.classList.add('active')}else{el.innerHTML='구성원을 클릭하세요';el.classList.remove('active')}}
+function updateCI(){const el=document.getElementById('coupleInfo');if(!selCouple){el.innerHTML='구성원을 <b>더블클릭</b>하여 부부 선택';el.classList.remove('active');return}const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b){selCouple=null;el.innerHTML='구성원을 <b>더블클릭</b>하여 부부 선택';el.classList.remove('active');return}el.innerHTML=`<strong>${a.name}</strong> + <strong>${b.name}</strong> <span class="ctag">부부</span>`;el.classList.add('active')}
 function toggleMS(id){if(multiSel.has(id)){multiSel.delete(id);gn(id)?.el.classList.remove('multi-sel')}else{multiSel.add(id);gn(id)?.el.classList.add('multi-sel')}}
 function clearMS(){multiSel.forEach(id=>gn(id)?.el.classList.remove('multi-sel'));multiSel.clear()}
-
-// 부모님 생성 로직: 선택된 노드 위쪽으로 두 부모님 나란히 배치 후 엉킴은 MagicFix가 처리
-function addParents(){
-  if(!selNode){toast('선택');return}
-  if(hasP(selNode.id)){toast('이미 있음');return}
-  pushUndo();
-  const pg=selNode.gen+1;
-  let fn='아버지',mn='어머니';
-  if(pg>=2){fn='할아버지';mn='할머니'}
-  if(pg>=3){fn='증조할아버지';mn='증조할머니'}
-  
-  const d=mkN('male', selNode.x - SG/2, selNode.y - GG, fn, false, pg);
-  const m=mkN('female', selNode.x + SG/2, selNode.y - GG, mn, false, pg);
-  $.push(d,m);
-  
-  C.push(
-    {from:d.id, to:m.id, type:'spouse', relStyle:'normal'},
-    {from:d.id, to:selNode.id, type:'parent', relStyle:'normal'},
-    {from:m.id, to:selNode.id, type:'parent', relStyle:'normal'}
-  );
-  magicFix();
-  toast('부모님 추가');
-}
-
-function addSpouse(g){
-  if(!selNode){toast('선택');return}
-  pushUndo();
-  let spCount = getAllSp(selNode.id).length;
-  let offset = (spCount % 2 === 0) ? SG * (spCount/2 + 1) : -SG * Math.ceil(spCount/2);
-  const sp=mkN(g,selNode.x + offset,selNode.y,'배우자',false,selNode.gen);
-  $.push(sp);
-  C.push({from:selNode.id,to:sp.id,type:'spouse',relStyle:'normal'});
-  magicFix();
-  toast('배우자 추가');
-}
-
-function addChild(g){if(!selCouple){toast('부부 더블클릭');return}pushUndo();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;const ch=mkN(g,0,0,g==='pregnant'?'임신중':'이름',false,Math.min(a.gen,b.gen)-1);$.push(ch);C.push({from:selCouple.a,to:ch.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:ch.id,type:'parent',relStyle:'normal'});magicFix();toast('자녀 추가')}
-function addSib(g,label){if(!selNode){toast('선택');return}const p=getP(selNode.id);if(p.length<2){toast('부모 필요');return}pushUndo();const sib=mkN(g,0,0,label,false,selNode.gen);$.push(sib);C.push({from:p[0].id,to:sib.id,type:'parent',relStyle:'normal'},{from:p[1].id,to:sib.id,type:'parent',relStyle:'normal'});magicFix();toast(label)}
-function addTwins(cnt){hideDD();if(!selCouple){toast('부부 선택');return}pushUndo();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;const cg=Math.min(a.gen,b.gen)-1;const ids=[];for(let i=0;i<cnt;i++){const ch=mkN('male',0,0,'쌍둥이'+(i+1),false,cg);$.push(ch);C.push({from:selCouple.a,to:ch.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:ch.id,type:'parent',relStyle:'normal'});ids.push(ch.id)}TG.push(ids);magicFix();toast('쌍둥이')}
+function addParents(){if(!selNode){toast('선택');return}if(hasP(selNode.id)){toast('이미 있음');return}pushUndo();const pg=selNode.gen+1;let fn='아버지',mn='어머니';if(pg>=2){fn='할아버지';mn='할머니'}if(pg>=3){fn='증조할아버지';mn='증조할머니'}const d=mkN('male',selNode.x-SG/2,selNode.y-GG,fn,false,pg),m=mkN('female',selNode.x+SG/2,selNode.y-GG,mn,false,pg);$.push(d,m);C.push({from:d.id,to:m.id,type:'spouse',relStyle:'normal'},{from:d.id,to:selNode.id,type:'parent',relStyle:'normal'},{from:m.id,to:selNode.id,type:'parent',relStyle:'normal'});renderAll();toast('부모님 추가')}
+function addSpouse(g){if(!selNode){toast('선택');return}pushUndo();let c=getAllSp(selNode.id).length;let o=(c%2===0)?SG*(c/2+1):-SG*Math.ceil(c/2);const sp=mkN(g,selNode.x+o,selNode.y,'배우자',false,selNode.gen);$.push(sp);C.push({from:selNode.id,to:sp.id,type:'spouse',relStyle:'normal'});renderAll();toast('배우자 추가')}
+function addChild(g){if(!selCouple){toast('부부 더블클릭');return}pushUndo();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;const nm=g==='pregnant'?'임신중':g==='miscarriage'?'유산':g==='abortion'?'유산':'이름';const childX=(a.x+b.x)/2;const childY=Math.max(a.y,b.y)+GG;const ch=mkN(g,childX,childY,nm,false,Math.min(a.gen,b.gen)-1);$.push(ch);C.push({from:selCouple.a,to:ch.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:ch.id,type:'parent',relStyle:'normal'});renderAll();toast(g==='miscarriage'?'자연 유산':g==='abortion'?'인공 유산':'자녀 추가')}
+function addSib(g,label){if(!selNode){toast('선택');return}const p=getP(selNode.id);if(p.length<2){toast('부모 필요');return}pushUndo();const sibX=selNode.x+SG+20;const sibY=selNode.y;const sib=mkN(g,sibX,sibY,label,false,selNode.gen);$.push(sib);C.push({from:p[0].id,to:sib.id,type:'parent',relStyle:'normal'},{from:p[1].id,to:sib.id,type:'parent',relStyle:'normal'});renderAll();toast(label)}
+function addTwins(cnt){hideDD();if(!selCouple){toast('부부 선택');return}pushUndo();const a=gn(selCouple.a),b=gn(selCouple.b);if(!a||!b)return;const cg=Math.min(a.gen,b.gen)-1;const ids=[];const startX=(a.x+b.x)/2-((cnt-1)*(NW+10))/2;const childY=Math.max(a.y,b.y)+GG;for(let i=0;i<cnt;i++){const ch=mkN('male',startX+(i*(NW+20)),childY,'쌍둥이'+(i+1),false,cg);$.push(ch);C.push({from:selCouple.a,to:ch.id,type:'parent',relStyle:'normal'},{from:selCouple.b,to:ch.id,type:'parent',relStyle:'normal'});ids.push(ch.id)}TG.push(ids);renderAll();toast('쌍둥이')}
 function addFree(type){pushUndo();const n=mkN(type,IW/2-NW/2+(Math.random()*40-20),IH/2-NH/2+(Math.random()*40-20),'이름',false,0,true);$.push(n);renderAll()}
 function delN(id){const i=$.findIndex(n=>n.id===id);if(i<0)return;if($[i].isMe){toast('삭제 불가');return}$[i].el.remove();$.splice(i,1);C=C.filter(c=>c.from!==id&&c.to!==id);TG=TG.map(t=>t.filter(x=>x!==id)).filter(t=>t.length>=2);if(selNode?.id===id){selNode=null;updateSI()}if(selCouple&&(selCouple.a===id||selCouple.b===id))clearCS();multiSel.delete(id);renderAll();toast('삭제')}
-
-const modeBtns={connect:'btnConn',spouse:'btnSpo',genderToggle:'btnGT',decToggle:'btnDT',delete:'btnDel',lnNorm:'lnN',lnClose:'lnC',lnDist:'lnD',lnCut:'lnX',lnConf:'lnF',lnDiv:'lnDv',lnSep:'lnSp',relNorm:'rlNorm',relClose:'rlClose',relDist:'rlDist',relCut:'rlCut',relConf:'rlConf',relDiv:'rlDiv',relSep:'rlSep'};
+const modeBtns={connect:'btnConn',spouse:'btnSpo',genderToggle:'btnGT',decToggle:'btnDT',delete:'btnDel',lnNorm:'lnN',lnClose:'lnC',lnFused:'lnFu',lnDist:'lnD',lnCut:'lnX',lnConf:'lnF',lnDiv:'lnDv',lnSep:'lnSp',relNorm:'rlNorm',relClose:'rlClose',relFused:'rlFused',relDist:'rlDist',relCut:'rlCut',relConf:'rlConf',relDiv:'rlDiv',relSep:'rlSep'};
 function tg(m){mode=mode===m?'select':m;pendingCouple=null;Object.values(modeBtns).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active','da-a')});if(mode!=='select'&&modeBtns[mode])document.getElementById(modeBtns[mode]).classList.add(mode==='delete'?'da-a':'active');caEl.classList.toggle('connecting',mode==='connect'||mode==='spouse'||mode.startsWith('rel'));caEl.classList.toggle('deleting',mode==='delete')}
 function setMyG(g){pushUndo();meGender=g;document.getElementById('gM').classList.toggle('sel',g==='male');document.getElementById('gF').classList.toggle('sel',g==='female');if(meNode){meNode.type=g;meNode.el.className=`node ${g} is-me`}renderAll()}
+function assignXRanks(){$.forEach(n=>n.xRank=undefined);let u=$.filter(n=>n.xRank===undefined);let cb=0;if(meNode)pC(meNode,0);while(true){u=$.filter(n=>n.xRank===undefined);if(!u.length)break;cb+=500000;pC(u[0],cb)}function pC(s,br){let q=[{node:s,rank:br,depth:1}];let h=0;while(h<q.length){let{node:n,rank,depth}=q[h++];if(n.xRank!==undefined)continue;n.xRank=rank;let ps=getP(n.id);if(ps.length===2){let o=20000/Math.pow(2,depth);let p1=ps[0],p2=ps[1];let pM=baseG(p1.type)==='male'?p1:p2;let pF=baseG(p1.type)==='female'?p1:p2;if(pM&&pM.xRank===undefined)q.push({node:pM,rank:rank-o,depth:depth+1});if(pF&&pF.xRank===undefined)q.push({node:pF,rank:rank+o,depth:depth+1})}else if(ps.length===1&&ps[0].xRank===undefined)q.push({node:ps[0],rank,depth:depth+1});getCh(n.id).forEach(c=>{if(c.xRank===undefined)q.push({node:c,rank,depth})});if(ps.length===2)chOf(ps[0].id,ps[1].id).map(id=>gn(id)).forEach(s=>{if(s&&s.xRank===undefined)q.push({node:s,rank,depth})});getAllSp(n.id).forEach((sp,idx)=>{if(sp.xRank===undefined){let bs=(baseG(n.type)==='male')?100000:-100000;let dir=(idx%2===0)?1:-1;q.push({node:sp,rank:rank+bs*dir*(Math.floor(idx/2)+1),depth})}})}}}
 
-/* ═══════════════════════════════════════════════════
-   혈통 및 이진 트리 위상 정렬(Topological Sort) 엔진
-   모든 독립된 구성원(가문)을 개별적인 영토로 분리 처리
-   ═══════════════════════════════════════════════════ */
-function assignXRanks() {
-    $.forEach(n => n.xRank = undefined);
-    let unassigned = $.filter(n => n.xRank === undefined);
-    let compBase = 0; // 독립된 가문마다 수십만 픽셀 격리
-
-    if (meNode) processComp(meNode, 0); // 메인 핏줄 최우선 정렬
-
-    while (true) {
-        unassigned = $.filter(n => n.xRank === undefined);
-        if (unassigned.length === 0) break;
-        compBase += 500000;
-        processComp(unassigned[0], compBase);
+function rowSort(a, b) {
+    if (Math.abs((a.xRank || 0) - (b.xRank || 0)) > 0.1) return (a.xRank || 0) - (b.xRank || 0);
+    let gA = baseG(a.type) === 'male' ? 0 : 1, gB = baseG(b.type) === 'male' ? 0 : 1;
+    if (cEx(a.id, b.id, 'spouse')) return gA - gB;
+    function getAgeScore(n) {
+        if (n.name === '형/오빠' || n.name === '언니/누나') return 1;
+        if (n.isMe) return 2;
+        if (n.name === '남동생' || n.name === '여동생') return 3;
+        return 2;
     }
-
-    function processComp(startNode, baseRank) {
-        let q = [{node: startNode, rank: baseRank, depth: 1}];
-        let head = 0;
-        while(head < q.length) {
-            let {node: n, rank, depth} = q[head++];
-            if (n.xRank !== undefined) continue;
-            n.xRank = rank;
-
-            // 조부모 세대 무한 팽창 방지: 세대가 올라갈수록 양쪽으로 X좌표 분산 부여 (이진 트리 구조)
-            let parents = getP(n.id);
-            if (parents.length === 2) {
-                let offset = 20000 / Math.pow(2, depth); 
-                let p1 = parents[0], p2 = parents[1];
-                let pM = baseG(p1.type) === 'male' ? p1 : p2;
-                let pF = baseG(p1.type) === 'female' ? p1 : p2;
-                if(pM && pM.xRank === undefined) q.push({node: pM, rank: rank - offset, depth: depth + 1});
-                if(pF && pF.xRank === undefined) q.push({node: pF, rank: rank + offset, depth: depth + 1});
-            } else if (parents.length === 1) {
-                if (parents[0].xRank === undefined) q.push({node: parents[0], rank: rank, depth: depth + 1});
-            }
-
-            getCh(n.id).forEach(c => { 
-                if (c.xRank === undefined) q.push({node: c, rank: rank, depth: depth}); 
-            });
-
-            if (parents.length === 2) {
-                chOf(parents[0].id, parents[1].id).map(id=>gn(id)).forEach(sib => {
-                    if (sib && sib.xRank === undefined) q.push({node: sib, rank: rank, depth: depth});
-                });
-            }
-
-            // 다중 배우자 정렬 개선: 좌 -> 우 교차로 랭크를 주어 첫 배우자와 겹치지 않게 본인을 중앙으로
-            let spouses = getAllSp(n.id);
-            spouses.forEach((sp, idx) => {
-                if (sp.xRank === undefined) {
-                    let baseShift = (baseG(n.type) === 'male') ? 100000 : -100000;
-                    let direction = (idx % 2 === 0) ? 1 : -1;
-                    let multiplier = Math.floor(idx / 2) + 1;
-                    q.push({node: sp, rank: rank + baseShift * direction * multiplier, depth: depth});
-                }
-            });
+    function s(n) {
+        const married = getAllSp(n.id).length > 0;
+        const isBloodline = hasP(n.id) || n.isMe;
+        let targetNode = n;
+        if (married && !isBloodline) {
+            const partner = getFirstSp(n.id);
+            if (partner) targetNode = partner;
         }
-    }
-}
-
-function rowSortFn(a, b) {
-    if (Math.abs((a.xRank||0) - (b.xRank||0)) > 0.1) return (a.xRank||0) - (b.xRank||0);
-    let gA = baseG(a.type) === 'male' ? 0 : 1;
-    let gB = baseG(b.type) === 'male' ? 0 : 1;
-    if (cEx(a.id, b.id, 'spouse')) return gA - gB; 
-    function s(n){
-        if(n.isMe)return 5;
-        if(n.name==='형/오빠'||n.name==='언니/누나')return 2;
-        if(n.name==='남동생'||n.name==='여동생')return 8;
-        return 5;
+        const ageScore = getAgeScore(targetNode);
+        if (married) {
+            if (baseG(targetNode.type) === 'female') { return 10 + ageScore; } 
+            else { return 80 + ageScore; }
+        } else {
+            return 40 + (ageScore * 10); 
+        }
     }
     if (s(a) !== s(b)) return s(a) - s(b);
     return a.id - b.id;
 }
 
-function magicFix() {
-    recalcGens();
-    assignXRanks(); 
-    
-    const gm = new Map();
-    $.forEach(n=>{if(!n.free||isConn(n.id)){if(!gm.has(n.gen))gm.set(n.gen,[]);gm.get(n.gen).push(n)}});
-    const gens=[...gm.keys()].sort((a,b)=>b-a);
-    const totalH=(gens.length-1)*GG+NH;
-    const startY=Math.max(10,(IH-totalH)/2);
-    
-    gens.forEach((g, i) => {
-        let row = gm.get(g);
-        row.sort(rowSortFn); 
-        row.forEach((n, idx) => {
-            n.y = startY + i * GG;
-            n.x = IW/2 + (idx - row.length/2) * (NW + MG); 
-        });
-    });
-
-    for(let pass = 0; pass < 150; pass++) {
-        gens.forEach(g => {
-            let row = gm.get(g);
-            row.forEach(n => {
-                let parents = getP(n.id);
-                if (parents.length === 2) {
-                    let pCenter = (parents[0].x + parents[1].x + NW) / 2;
-                    let sibs = chOf(parents[0].id, parents[1].id).map(id=>gn(id)).filter(Boolean);
-                    if (sibs.length) {
-                        let sMin = Math.min(...sibs.map(s=>s.x));
-                        let sMax = Math.max(...sibs.map(s=>s.x));
-                        let sCenter = (sMin + sMax + NW) / 2;
-                        let force = (pCenter - sCenter) * 0.15;
-                        sibs.forEach(s => s.x += force);
-                    }
-                }
-            });
-        });
-
-        gens.forEach(g => {
-            let row = gm.get(g);
-            row.forEach(n => {
-                let spouses = getAllSp(n.id);
-                spouses.forEach(sp => {
-                    if (n.id < sp.id) { 
-                        let kids = chOf(n.id, sp.id).map(id=>gn(id)).filter(Boolean);
-                        if (kids.length) {
-                            let kMin = Math.min(...kids.map(k=>k.x)), kMax = Math.max(...kids.map(k=>k.x));
-                            let kCenter = (kMin + kMax + NW) / 2;
-                            let pCenter = (n.x + sp.x + NW) / 2;
-                            let force = (kCenter - pCenter) * 0.15;
-                            n.x += force;
-                            sp.x += force;
-                        }
-                    }
-                });
-            });
-        });
-
-        C.filter(c=>c.type==='spouse').forEach(conn => {
-            let n1 = gn(conn.from), n2 = gn(conn.to);
-            if (n1 && n2) {
-                let dist = Math.abs(n1.x - n2.x);
-                if (dist > SG) {
-                    let force = (dist - SG) * 0.1;
-                    if (n1.x < n2.x) { n1.x += force; n2.x -= force; }
-                    else { n1.x -= force; n2.x += force; }
-                }
-            }
-        });
-
-        gens.forEach(g => {
-            let row = gm.get(g);
-            row.sort(rowSortFn); 
-            for (let iter = 0; iter < 3; iter++) {
-                for (let i = 1; i < row.length; i++) {
-                    let prev = row[i-1], curr = row[i];
-                    let isSp = cEx(prev.id, curr.id, 'spouse');
-                    let isSameFamily = Math.abs(prev.xRank - curr.xRank) < 0.1;
-                    let reqGap = isSp ? SG : (isSameFamily ? NW + MG : NW + MG * 2.5); 
-                    let diff = (prev.x + reqGap) - curr.x;
-                    if (diff > 0) {
-                        prev.x -= diff * 0.5;
-                        curr.x += diff * 0.5;
-                    }
-                }
-                for (let i = row.length - 2; i >= 0; i--) {
-                    let curr = row[i], next = row[i+1];
-                    let isSp = cEx(curr.id, next.id, 'spouse');
-                    let isSameFamily = Math.abs(curr.xRank - next.xRank) < 0.1;
-                    let reqGap = isSp ? SG : (isSameFamily ? NW + MG : NW + MG * 2.5);
-                    let diff = curr.x - (next.x - reqGap);
-                    if (diff > 0) {
-                        curr.x -= diff * 0.5;
-                        next.x += diff * 0.5;
-                    }
-                }
-            }
-        });
-    }
-
-    gens.forEach(g => {
-        let row = gm.get(g);
-        row.sort(rowSortFn);
-        for (let i = 1; i < row.length; i++) {
-            let prev = row[i-1], curr = row[i];
-            let isSp = cEx(prev.id, curr.id, 'spouse');
-            let isSameFamily = Math.abs(prev.xRank - curr.xRank) < 0.1;
-            let reqGap = isSp ? SG : (isSameFamily ? NW + MG : NW + MG * 2.5);
-            if (curr.x < prev.x + reqGap) {
-                curr.x = prev.x + reqGap;
-            }
-        }
-    });
-
-    let mnX = Infinity, mxX = -Infinity;
-    $.filter(n=>!n.free||isConn(n.id)).forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW)});
-    if(mnX < Infinity){
-        const sh = (IW - (mxX - mnX))/2 - mnX;
-        $.filter(n=>!n.free||isConn(n.id)).forEach(n=>{n.x+=sh; clampN(n)});
-    }
-    $.forEach(n=>setPos(n));
-    renderAll();
-}
-
+function magicFix(){recalcGens();assignXRanks();const gm=new Map();$.forEach(n=>{if(!n.free||isConn(n.id)){if(!gm.has(n.gen))gm.set(n.gen,[]);gm.get(n.gen).push(n)}});const gens=[...gm.keys()].sort((a,b)=>b-a);const tH=(gens.length-1)*GG+NH;const sY=Math.max(10,(IH-tH)/2);gens.forEach((g,i)=>{let row=gm.get(g);row.sort(rowSort);row.forEach((n,idx)=>{n.y=sY+i*GG;n.x=IW/2+(idx-row.length/2)*(NW+MG)})});for(let pass=0;pass<150;pass++){gens.forEach(g=>{let row=gm.get(g);row.forEach(n=>{let ps=getP(n.id);if(ps.length===2){let pc=(ps[0].x+ps[1].x+NW)/2;let sibs=chOf(ps[0].id,ps[1].id).map(id=>gn(id)).filter(Boolean);if(sibs.length){let sMin=Math.min(...sibs.map(s=>s.x)),sMax=Math.max(...sibs.map(s=>s.x));let sc=(sMin+sMax+NW)/2;sibs.forEach(s=>s.x+=(pc-sc)*0.15)}}})});gens.forEach(g=>{let row=gm.get(g);row.forEach(n=>{getAllSp(n.id).forEach(sp=>{if(n.id<sp.id){let kids=chOf(n.id,sp.id).map(id=>gn(id)).filter(Boolean);if(kids.length){let kc=(Math.min(...kids.map(k=>k.x))+Math.max(...kids.map(k=>k.x))+NW)/2;let pc=(n.x+sp.x+NW)/2;let f=(kc-pc)*0.15;n.x+=f;sp.x+=f}}})})});C.filter(c=>c.type==='spouse').forEach(cn=>{let n1=gn(cn.from),n2=gn(cn.to);if(n1&&n2){let d=Math.abs(n1.x-n2.x);if(d>SG){let f=(d-SG)*0.1;if(n1.x<n2.x){n1.x+=f;n2.x-=f}else{n1.x-=f;n2.x+=f}}}});gens.forEach(g=>{let row=gm.get(g);row.sort(rowSort);for(let it=0;it<3;it++){for(let i=1;i<row.length;i++){let p=row[i-1],c=row[i];let isSp=cEx(p.id,c.id,'spouse');let isSF=Math.abs(p.xRank-c.xRank)<0.1;let rq=isSp?SG:(isSF?NW+MG:NW+MG*2.5);let df=(p.x+rq)-c.x;if(df>0){p.x-=df*.5;c.x+=df*.5}}for(let i=row.length-2;i>=0;i--){let c=row[i],nx=row[i+1];let isSp=cEx(c.id,nx.id,'spouse');let isSF=Math.abs(c.xRank-nx.xRank)<0.1;let rq=isSp?SG:(isSF?NW+MG:NW+MG*2.5);let df=c.x-(nx.x-rq);if(df>0){c.x-=df*.5;nx.x+=df*.5}}}})};gens.forEach(g=>{let row=gm.get(g);row.sort(rowSort);for(let i=1;i<row.length;i++){let p=row[i-1],c=row[i];let isSp=cEx(p.id,c.id,'spouse');let isSF=Math.abs(p.xRank-c.xRank)<0.1;let rq=isSp?SG:(isSF?NW+MG:NW+MG*2.5);if(c.x<p.x+rq)c.x=p.x+rq}});let mnX=Infinity,mxX=-Infinity;$.filter(n=>!n.free||isConn(n.id)).forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW)});if(mnX<Infinity){const sh=(IW-(mxX-mnX))/2-mnX;$.filter(n=>!n.free||isConn(n.id)).forEach(n=>{n.x+=sh;clampN(n)})}$.forEach(n=>setPos(n));renderAll()}
 function recalcGens(){if(!meNode)return;const vis=new Set(),q=[{id:meNode.id,gen:0}];vis.add(meNode.id);while(q.length){const{id,gen}=q.shift();const n=gn(id);if(!n)continue;n.gen=gen;getAllSp(id).forEach(sp=>{if(!vis.has(sp.id)){vis.add(sp.id);q.push({id:sp.id,gen})}});getP(id).forEach(p=>{if(!vis.has(p.id)){vis.add(p.id);q.push({id:p.id,gen:gen+1})}});getCh(id).forEach(c=>{if(!vis.has(c.id)){vis.add(c.id);q.push({id:c.id,gen:gen-1})}})}}
-
 function centerAll(){if(!$.length)return;let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;$.forEach(n=>{mnX=Math.min(mnX,n.x);mxX=Math.max(mxX,n.x+NW);mnY=Math.min(mnY,n.y);mxY=Math.max(mxY,n.y+NH+16)});const shX=(IW-(mxX-mnX))/2-mnX,shY=(IH-(mxY-mnY))/2-mnY;$.forEach(n=>{n.x+=shX;n.y+=shY;clampN(n);setPos(n)});renderLines();toast('중앙')}
-function renderCards(){const sc=document.getElementById('mpSc');sc.innerHTML='';$.forEach(n=>{const card=document.createElement('div');card.className='mc'+(selNode?.id===n.id?' sel':'');const fem=isFem(n.type),dec=n.type.startsWith('deceased'),preg=n.type==='pregnant';let ic=fem?'female':'male';if(dec)ic+=' dec';if(preg)ic='preg';card.innerHTML=`<div class="mc-top"><div class="mc-ic ${ic}"></div><div class="mc-tt">${n.name}${n.isMe?' (나)':''}</div>${n.isMe?'':`<button class="mc-del" data-id="${n.id}">✕</button>`}</div><div class="mc-fields"><div class="mc-f"><label>이름</label><input type="text" value="${n.name}" data-id="${n.id}" data-f="name"></div><div class="mc-f"><label>나이</label><input type="text" value="${n.age||''}" data-id="${n.id}" data-f="age"></div></div>`;card.addEventListener('click',e=>{if(e.target.closest('.mc-del')){pushUndo();delN(parseInt(e.target.closest('.mc-del').dataset.id));return}if(e.target.tagName==='INPUT')return;const nd=gn(n.id);if(nd)selectNode(nd)});card.querySelectorAll('input').forEach(inp=>{inp.addEventListener('input',()=>{const nd=gn(parseInt(inp.dataset.id));if(!nd)return;if(inp.dataset.f==='name'){nd.name=inp.value||'이름';nd.el.querySelector('.nn').textContent=nd.name;card.querySelector('.mc-tt').textContent=nd.name+(nd.isMe?' (나)':'')}else if(inp.dataset.f==='age'){nd.age=inp.value;updAge(nd)}})});sc.appendChild(card)});updateSI()}
+function renderCards(){const sc=document.getElementById('mpSc');sc.innerHTML='';$.forEach(n=>{const card=document.createElement('div');card.className='mc'+(selNode?.id===n.id?' sel':'');const fem=isFem(n.type),dec=n.type.startsWith('deceased'),preg=n.type==='pregnant',misc=n.type==='miscarriage',abrt=n.type==='abortion';let ic=fem?'female':'male';if(dec)ic+=' dec';if(preg)ic='preg';if(misc)ic='misc';if(abrt)ic='abrt';card.innerHTML=`<div class="mc-top"><div class="mc-ic ${ic}"></div><div class="mc-tt">${n.name}${n.isMe?' (나)':''}</div>${n.isMe?'':`<button class="mc-del" data-id="${n.id}">✕</button>`}</div><div class="mc-fields"><div class="mc-f"><label>이름</label><input type="text" value="${n.name}" data-id="${n.id}" data-f="name"></div><div class="mc-f"><label>나이</label><input type="text" value="${n.age||''}" data-id="${n.id}" data-f="age"></div></div><div class="mc-fields"><div class="mc-f"><label>출생</label><input type="text" value="${n.birth||''}" data-id="${n.id}" data-f="birth"></div><div class="mc-f"><label>사망</label><input type="text" value="${n.death||''}" data-id="${n.id}" data-f="death"></div></div>`;card.addEventListener('click',e=>{if(e.target.closest('.mc-del')){pushUndo();delN(parseInt(e.target.closest('.mc-del').dataset.id));return}if(e.target.tagName==='INPUT')return;const nd=gn(n.id);if(nd)selectNode(nd)});card.querySelectorAll('input').forEach(inp=>{inp.addEventListener('input',()=>{const nd=gn(parseInt(inp.dataset.id));if(!nd)return;if(inp.dataset.f==='name'){nd.name=inp.value||'이름';nd.el.querySelector('.nn').textContent=nd.name;card.querySelector('.mc-tt').textContent=nd.name+(nd.isMe?' (나)':'')}else if(inp.dataset.f==='age'){nd.age=inp.value;updAge(nd)}else if(inp.dataset.f==='birth'){nd.birth=inp.value;updBD(nd)}else if(inp.dataset.f==='death'){nd.death=inp.value;updBD(nd)}})});sc.appendChild(card)});updateSI()}
 function ctxA(a){ctxEl.classList.remove('show');if(!ctxTgt)return;const n=ctxTgt;switch(a){case 'rename':const nm=n.el.querySelector('.nn');nm.focus();const r=document.createRange();r.selectNodeContents(nm);window.getSelection().removeAllRanges();window.getSelection().addRange(r);break;case 'toM':pushUndo();chT(n,'male');break;case 'toF':pushUndo();chT(n,'female');break;case 'toDM':pushUndo();chT(n,'deceased-male');break;case 'toDF':pushUndo();chT(n,'deceased-female');break;case 'del':if(n.isMe)toast('삭제 불가');else{pushUndo();delN(n.id)}break}ctxTgt=null}
 function chT(n,t){n.type=t;n.el.className=`node ${t}`+(n.isMe?' is-me':'')+(n.free?' free-node':'');if(n.isMe){meGender=baseG(t);document.getElementById('gM').classList.toggle('sel',meGender==='male');document.getElementById('gF').classList.toggle('sel',meGender==='female')}renderAll()}
 function clearAll(){if($.length<=1)return;if(!confirm('초기화?'))return;pushUndo();$.filter(n=>!n.isMe).forEach(n=>n.el.remove());$=$.filter(n=>n.isMe);C=[];TG=[];selNode=null;clearCS();clearMS();pendingCouple=null;meNode.x=IW/2-NW/2;meNode.y=IH/2-NH/2;meNode.gen=0;setPos(meNode);renderAll();toast('초기화')}
@@ -432,28 +249,13 @@ function hideDD(){document.querySelectorAll('.dd-mn').forEach(d=>d.style.display
 function showTutorial(){document.getElementById('tutorialModal').classList.add('show')}
 function closeTutorial(){document.getElementById('tutorialModal').classList.remove('show')}
 function downloadJPG(){document.querySelectorAll('.port').forEach(p=>p.style.display='none');$.forEach(n=>n.el.classList.remove('selected','couple-sel','multi-sel'));html2canvas(a4,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false}).then(c=>{const lnk=document.createElement('a');lnk.download='가계도.jpg';lnk.href=c.toDataURL('image/jpeg',.95);lnk.click();document.querySelectorAll('.port').forEach(p=>p.style.display='');toast('JPG')}).catch(()=>{document.querySelectorAll('.port').forEach(p=>p.style.display='');toast('실패')})}
-
 caCanvas.addEventListener('mousedown',e=>{if(e.target.closest('.node'))return;if(selNode){selNode.el.classList.remove('selected');selNode=null;updateSI();renderCards()}clearCS();clearMS();pendingCouple=null;if(mode==='select'&&!e.target.closest('.ca-toolbar')&&!e.target.closest('.ca-toolbar2')&&!e.target.closest('.ca-toolbar3')){const rect=cinr.getBoundingClientRect();msX=(e.clientX-rect.left)/scale;msY=(e.clientY-rect.top)/scale;msDrag=true;selRectEl=document.createElement('div');selRectEl.className='sel-rect';selRectEl.style.left=msX+'px';selRectEl.style.top=msY+'px';selRectEl.style.width='0';selRectEl.style.height='0';cinr.appendChild(selRectEl)}});
 document.addEventListener('mousemove',e=>{if(drag){const rect=cinr.getBoundingClientRect();if(multiDragStart&&multiSel.size>1){const dx=(e.clientX-multiDragStart.x)/scale;multiSel.forEach(id=>{const n=gn(id);if(!n)return;const o=multiDragStart.pos.get(id);if(!o)return;n.x=Math.max(0,Math.min(IW-NW,o.x+dx));setPos(n)});renderLines();return}let nx=(e.clientX-rect.left)/scale-dox;nx=Math.max(0,Math.min(IW-NW,nx));if(dragFree){let ny=(e.clientY-rect.top)/scale-doy;ny=Math.max(0,Math.min(IH-NH,ny));const genYs=new Set();$.forEach(n=>{if(n.id!==drag.id&&!n.free)genYs.add(n.y)});let bestY=ny,bestD=SNAP+1;genYs.forEach(gy=>{const d=Math.abs(ny-gy);if(d<bestD){bestD=d;bestY=gy}});if(bestD<=SNAP)ny=bestY;drag.y=ny}const parents=getP(drag.id);if(parents.length>=2){const pmx=(parents[0].x+parents[1].x+NW)/2;if(Math.abs(nx+NW/2-pmx)<SNAP)nx=pmx-NW/2}drag.x=nx;setPos(drag);renderLines()}if(msDrag&&selRectEl){const rect=cinr.getBoundingClientRect();const cx=(e.clientX-rect.left)/scale,cy=(e.clientY-rect.top)/scale;selRectEl.style.left=Math.min(msX,cx)+'px';selRectEl.style.top=Math.min(msY,cy)+'px';selRectEl.style.width=Math.abs(cx-msX)+'px';selRectEl.style.height=Math.abs(cy-msY)+'px'}if(tmpLine&&connFrom){const rect=cinr.getBoundingClientRect();tmpLine.setAttribute('x2',(e.clientX-rect.left)/scale);tmpLine.setAttribute('y2',(e.clientY-rect.top)/scale)}});
 document.addEventListener('mouseup',()=>{if(drag){drag.el.classList.remove('dragging');drag=null;dragFree=false;multiDragStart=null}if(selRectEl){const x=parseFloat(selRectEl.style.left),y=parseFloat(selRectEl.style.top),w=parseFloat(selRectEl.style.width),h=parseFloat(selRectEl.style.height);if(w>5&&h>5){clearMS();$.forEach(n=>{if(n.x+NW/2>=x&&n.x+NW/2<=x+w&&n.y+NH/2>=y&&n.y+NH/2<=y+h){multiSel.add(n.id);n.el.classList.add('multi-sel')}})}selRectEl.remove();selRectEl=null}msDrag=false;if(connFrom)finConn()});
 document.addEventListener('click',e=>{if(!ctxEl.contains(e.target))ctxEl.classList.remove('show')});
-
-/* ════════ 단축키 연동 ════════ */
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT' || e.target.isContentEditable) return; // 텍스트 편집 중 오작동 방지
-  if(e.key==='Escape'){tg(mode);finConn();ctxEl.classList.remove('show');clearCS();clearMS();pendingCouple=null}
-  if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='z'||e.key==='Z')){e.preventDefault();doRedo()}
-  else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo()}
-  else if((e.key==='Delete' || e.key==='Backspace') && selNode) {
-      e.preventDefault();
-      if(!selNode.isMe){pushUndo();delN(selNode.id);}
-      else toast('삭제 불가');
-  }
-});
-
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.isContentEditable)return;if(e.key==='Escape'){tg(mode);finConn();ctxEl.classList.remove('show');clearCS();clearMS();pendingCouple=null}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='z'||e.key==='Z')){e.preventDefault();doRedo()}else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo()}else if((e.key==='Delete'||e.key==='Backspace')&&selNode){e.preventDefault();if(!selNode.isMe){pushUndo();delN(selNode.id)}else toast('삭제 불가')}});
 caCanvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.getElementById('tutorialModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTutorial()});
-
 function fitScale(){const aw=window.innerWidth-540,ah=window.innerHeight-120;scale=Math.min(1,Math.min((aw-20)/PW,(ah-20)/PH));uz()}
 meNode=mkN(meGender,IW/2-NW/2,IH/2-NH/2,'나',true,0);$.push(meNode);selectNode(meNode);fitScale();renderAll();updUI();
 window.addEventListener('resize',fitScale);
